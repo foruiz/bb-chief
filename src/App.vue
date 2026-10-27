@@ -5,8 +5,6 @@ import type { CreateMatchInput, MatchSession, TeamId } from './domain/models/mat
 import { createMatch } from './domain/services/create-match'
 import {
   confirmHalftime,
-  correctRerolls,
-  correctTouchdowns,
   createSession,
   finishTurn,
   recordTouchdown,
@@ -67,9 +65,9 @@ const teams = computed(() => {
   return [currentMatch.value.teams.home, currentMatch.value.teams.away]
 })
 
-const activeTeamName = computed(() => {
-  if (!currentMatch.value) return ''
-  return currentMatch.value.teams[currentMatch.value.activeTeamId].name
+const activeTeam = computed(() => {
+  if (!currentMatch.value) return null
+  return currentMatch.value.teams[currentMatch.value.activeTeamId]
 })
 
 const recoveryPending = ref(false)
@@ -117,29 +115,6 @@ function updateSession(action: (current: MatchSession) => MatchSession) {
 
 function addTouchdown(teamId: TeamId) {
   updateSession((current) => recordTouchdown(current, teamId))
-}
-
-function removeTouchdown(teamId: TeamId) {
-  updateSession((current) => {
-    const score = current.current.teams[teamId].touchdowns
-    if (score === 0) return current
-    return correctTouchdowns(current, teamId, score - 1)
-  })
-}
-
-function addReroll(teamId: TeamId) {
-  updateSession((current) => {
-    const count = current.current.teams[teamId].rerollsAvailable
-    return correctRerolls(current, teamId, count + 1)
-  })
-}
-
-function removeReroll(teamId: TeamId) {
-  updateSession((current) => {
-    const count = current.current.teams[teamId].rerollsAvailable
-    if (count === 0) return current
-    return correctRerolls(current, teamId, count - 1)
-  })
 }
 
 function consumeReroll(teamId: TeamId) {
@@ -197,11 +172,6 @@ function beginNewMatch() {
   recoveryPending.value = false
   storageWarning.value = ''
   errorMessage.value = ''
-}
-
-function teamTurnLabel(turnsCompleted: number) {
-  if (turnsCompleted >= maxTurns.value) return 'Turnos completados'
-  return `Turno ${turnsCompleted + 1} de ${maxTurns.value}`
 }
 
 function drawKickingTeam() {
@@ -264,7 +234,7 @@ function continueSavedMatch() {
             <h1 class="text-xl font-black tracking-wider sm:text-2xl">
               BB <span class="text-emerald-400">CHIEF</span>
             </h1>
-            <p class="text-xs text-slate-400">Blood Bowl match tracker</p>
+            <p class="text-xs text-slate-400">Hecho para jugar</p>
           </div>
         </div>
 
@@ -522,142 +492,201 @@ function continueSavedMatch() {
         </form>
       </section>
 
-      <section v-else-if="currentMatch" class="space-y-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-400">
-              {{ currentMatch.format === 'normal' ? 'Partido normal' : 'Blood Bowl Sevens' }}
-            </p>
-            <h2 class="mt-1 text-2xl font-black sm:text-3xl">
-              {{ currentMatch.half === 1 ? 'Primera parte' : 'Segunda parte' }}
-            </h2>
-          </div>
-
-          <div class="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-right">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Turno activo</p>
-            <p class="mt-1 font-black text-emerald-300">{{ activeTeamName }}</p>
-          </div>
+      <section v-else-if="currentMatch && activeTeam" class="space-y-5">
+        <!-- Parte centrada -->
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4 text-center">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">
+            {{ currentMatch.format === 'normal' ? 'Partido normal' : 'Blood Bowl Sevens' }}
+          </p>
+          <h2 class="mt-1 text-2xl font-black sm:text-3xl">
+            {{
+              currentMatch.status === 'finished'
+                ? 'Partido finalizado'
+                : currentMatch.half === 1
+                  ? 'Primera Parte'
+                  : 'Segunda Parte'
+            }}
+          </h2>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <!-- Marcador general -->
+        <div class="grid grid-cols-2 gap-3 sm:gap-5">
           <article
             v-for="team in teams"
             :key="team.id"
-            class="overflow-hidden rounded-2xl border bg-slate-900 transition"
-            :class="[
-              team.id === 'home' ? 'border-emerald-500/40' : 'border-rose-500/40',
-              currentMatch.activeTeamId === team.id && currentMatch.status === 'in-progress'
-                ? 'ring-2 ring-emerald-400/70'
-                : '',
-            ]"
+            class="rounded-2xl border p-3 text-center sm:p-5"
+            :class="
+              team.id === 'home'
+                ? 'border-emerald-500/40 bg-slate-900'
+                : 'border-rose-500/40 bg-slate-900'
+            "
           >
+            <!-- Logo provisional -->
             <div
-              class="p-4 sm:p-5"
-              :class="team.id === 'home' ? 'bg-emerald-400/5' : 'bg-rose-400/5'"
+              class="mx-auto flex size-14 items-center justify-center rounded-2xl text-2xl sm:size-16"
+              :class="
+                team.id === 'home'
+                  ? 'bg-emerald-400/10 text-emerald-300'
+                  : 'bg-rose-400/10 text-rose-300'
+              "
+              aria-hidden="true"
             >
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <p
-                    class="text-xs font-bold uppercase tracking-[0.18em]"
-                    :class="team.id === 'home' ? 'text-emerald-400' : 'text-rose-400'"
-                  >
-                    {{ team.id === 'home' ? 'Local' : 'Visitante' }}
-                  </p>
-                  <h3 class="mt-1 break-words text-xl font-black sm:text-2xl">{{ team.name }}</h3>
-                  <p class="mt-1 text-sm text-slate-400">{{ team.race }}</p>
-                </div>
-
-                <span
-                  v-if="
-                    currentMatch.activeTeamId === team.id && currentMatch.status === 'in-progress'
-                  "
-                  class="shrink-0 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-black text-emerald-300"
-                >
-                  AL TURNO
-                </span>
-              </div>
-
-              <div class="my-5 rounded-xl border border-slate-800 bg-slate-950/80 p-4 text-center">
-                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
-                  Touchdowns
-                </p>
-                <p class="my-1 text-6xl font-black tabular-nums sm:text-7xl">
-                  {{ team.touchdowns }}
-                </p>
-                <div class="mt-4 flex justify-center gap-3">
-                  <button
-                    :disabled="currentMatch.status !== 'in-progress' || team.touchdowns === 0"
-                    class="size-12 rounded-xl border border-slate-700 bg-slate-900 text-2xl font-bold transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
-                    :aria-label="`Restar touchdown a ${team.name}`"
-                    @click="removeTouchdown(team.id)"
-                  >
-                    −
-                  </button>
-                  <button
-                    :disabled="currentMatch.status !== 'in-progress'"
-                    class="min-h-12 flex-1 rounded-xl bg-emerald-400 px-4 font-black text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    @click="addTouchdown(team.id)"
-                  >
-                    + TOUCHDOWN
-                  </button>
-                </div>
-              </div>
-
-              <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                <div class="flex items-center justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-bold">Segundas oportunidades</p>
-                    <p class="mt-1 text-xs text-slate-500">Disponibles</p>
-                  </div>
-                  <p class="text-3xl font-black tabular-nums">{{ team.rerollsAvailable }}</p>
-                </div>
-
-                <div class="mt-4 grid grid-cols-3 gap-2">
-                  <button
-                    :disabled="currentMatch.status !== 'in-progress' || team.rerollsAvailable === 0"
-                    class="min-h-11 rounded-lg border border-slate-700 text-xl font-bold transition hover:bg-slate-800 disabled:opacity-30"
-                    :aria-label="`Corregir segundas oportunidades de ${team.name}`"
-                    @click="removeReroll(team.id)"
-                  >
-                    −
-                  </button>
-                  <button
-                    :disabled="currentMatch.status !== 'in-progress' || team.rerollsAvailable === 0"
-                    class="min-h-11 rounded-lg bg-amber-400 px-2 text-xs font-black text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-30"
-                    @click="consumeReroll(team.id)"
-                  >
-                    USAR
-                  </button>
-                  <button
-                    :disabled="currentMatch.status !== 'in-progress'"
-                    class="min-h-11 rounded-lg border border-slate-700 text-xl font-bold transition hover:bg-slate-800 disabled:opacity-30"
-                    :aria-label="`Añadir segunda oportunidad a ${team.name}`"
-                    @click="addReroll(team.id)"
-                  >
-                    +
-                  </button>
-                </div>
-                <p class="mt-2 text-center text-xs text-slate-500">
-                  − / + corrige el contador; «Usar» consume una.
-                </p>
-              </div>
-
-              <div class="mt-4 flex items-center justify-between text-sm">
-                <span class="text-slate-400">Turnos</span>
-                <span class="font-bold">{{ teamTurnLabel(team.turnsCompleted) }}</span>
-              </div>
-              <div class="mt-2 flex gap-1">
-                <div
-                  v-for="turn in maxTurns"
-                  :key="turn"
-                  class="h-1.5 flex-1 rounded-full"
-                  :class="turn <= team.turnsCompleted ? 'bg-emerald-400' : 'bg-slate-800'"
-                ></div>
-              </div>
+              🛡️
             </div>
+
+            <p
+              class="mt-3 break-words text-sm font-black sm:text-lg"
+              :class="team.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+            >
+              {{ team.name }}
+            </p>
+
+            <p class="mt-2 text-5xl font-black tabular-nums sm:text-7xl">
+              {{ team.touchdowns }}
+            </p>
+
+            <p class="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Touchdowns</p>
           </article>
         </div>
 
+        <!-- Panel del equipo activo -->
+        <article
+          class="overflow-hidden rounded-2xl border bg-slate-900"
+          :class="activeTeam.id === 'home' ? 'border-emerald-500/50' : 'border-rose-500/50'"
+        >
+          <div
+            class="p-4 sm:p-6"
+            :class="activeTeam.id === 'home' ? 'bg-emerald-400/5' : 'bg-rose-400/5'"
+          >
+            <!-- Identidad del equipo -->
+            <div class="flex items-center gap-3">
+              <div
+                class="flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl"
+                :class="
+                  activeTeam.id === 'home'
+                    ? 'bg-emerald-400/10 text-emerald-300'
+                    : 'bg-rose-400/10 text-rose-300'
+                "
+                aria-hidden="true"
+              >
+                🛡️
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                  Turno activo
+                </p>
+                <h3
+                  class="break-words text-xl font-black sm:text-2xl"
+                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                >
+                  {{ activeTeam.name }}
+                </h3>
+                <p class="mt-1 text-sm text-slate-400">{{ activeTeam.race }}</p>
+              </div>
+            </div>
+
+            <!-- Progreso visual de turnos -->
+            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Progreso de turnos
+                  </p>
+                  <p
+                    class="mt-1 text-2xl font-black"
+                    :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                  >
+                    {{ Math.min(activeTeam.turnsCompleted + 1, maxTurns) }}
+                    <span class="text-base font-semibold text-slate-500">de {{ maxTurns }}</span>
+                  </p>
+                </div>
+
+                <div
+                  class="rounded-lg px-3 py-2 text-sm font-black"
+                  :class="
+                    activeTeam.id === 'home'
+                      ? 'bg-emerald-400/10 text-emerald-300'
+                      : 'bg-rose-400/10 text-rose-300'
+                  "
+                >
+                  {{ Math.round((activeTeam.turnsCompleted / maxTurns) * 100) }} %
+                </div>
+              </div>
+
+              <div class="mt-4 flex gap-1.5">
+                <div
+                  v-for="turn in maxTurns"
+                  :key="turn"
+                  class="h-3 flex-1 rounded-sm transition-colors"
+                  :class="
+                    turn <= activeTeam.turnsCompleted
+                      ? activeTeam.id === 'home'
+                        ? 'bg-emerald-400'
+                        : 'bg-rose-400'
+                      : turn === activeTeam.turnsCompleted + 1
+                        ? activeTeam.id === 'home'
+                          ? 'bg-emerald-400/50 ring-1 ring-emerald-300'
+                          : 'bg-rose-400/50 ring-1 ring-rose-300'
+                        : 'bg-slate-800'
+                  "
+                ></div>
+              </div>
+
+              <p class="mt-3 text-xs text-slate-400">
+                {{ activeTeam.turnsCompleted }} completados ·
+                {{ Math.max(0, maxTurns - activeTeam.turnsCompleted - 1) }} restantes después del
+                actual
+              </p>
+            </div>
+
+            <!-- Acciones principales en la misma fila -->
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <button
+                :disabled="currentMatch.status !== 'in-progress'"
+                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl bg-emerald-400 p-3 font-black text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+                :class="
+                  activeTeam.id === 'away'
+                    ? 'bg-rose-400 hover:bg-rose-300'
+                    : 'bg-emerald-400 hover:bg-emerald-300'
+                "
+                @click="addTouchdown(activeTeam.id)"
+              >
+                <span class="text-2xl" aria-hidden="true">🏈</span>
+                <span>Touchdown</span>
+              </button>
+
+              <button
+                :disabled="
+                  currentMatch.status !== 'in-progress' || activeTeam.rerollsAvailable === 0
+                "
+                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 transition disabled:cursor-not-allowed disabled:opacity-40"
+                :class="
+                  activeTeam.id === 'home'
+                    ? 'border-emerald-500/50 bg-emerald-400/5 hover:bg-emerald-400/10'
+                    : 'border-rose-500/50 bg-rose-400/5 hover:bg-rose-400/10'
+                "
+                @click="consumeReroll(activeTeam.id)"
+              >
+                <span
+                  class="text-2xl font-black tabular-nums"
+                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                >
+                  {{ activeTeam.rerollsAvailable }}
+                </span>
+                <span
+                  class="flex items-center justify-center gap-1 text-center text-xs font-black sm:text-sm"
+                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                >
+                  <span aria-hidden="true">↻</span>
+                  <span>Usar Segunda Oportunidad</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Descanso -->
         <div
           v-if="currentMatch.status === 'halftime-pending'"
           class="rounded-2xl border border-amber-400/50 bg-amber-400/10 p-5"
@@ -669,22 +698,23 @@ function continueSavedMatch() {
             segunda parte.
           </p>
           <button
-            class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-black text-slate-950 transition hover:bg-amber-300"
+            class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-black text-slate-950 hover:bg-amber-300"
             @click="startSecondHalf"
           >
             Comenzar segunda parte
           </button>
         </div>
 
+        <!-- Partido finalizado -->
         <div
           v-else-if="currentMatch.status === 'finished'"
-          class="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-5 text-center"
+          class="rounded-2xl border border-emerald-400/40 bg-slate-900 p-5 text-center"
           role="status"
         >
           <p class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">
             Partido finalizado
           </p>
-          <p class="mt-2 text-3xl font-black">
+          <p class="mt-2 text-4xl font-black">
             {{ currentMatch.teams.home.touchdowns }}
             <span class="text-slate-500">—</span>
             {{ currentMatch.teams.away.touchdowns }}
@@ -708,9 +738,15 @@ function continueSavedMatch() {
           </button>
         </div>
 
+        <!-- Finalizar turno -->
         <div v-else class="rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
           <button
             class="w-full rounded-xl bg-emerald-400 px-5 py-4 text-lg font-black text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-300 active:scale-[0.99]"
+            :class="
+              activeTeam.id === 'away'
+                ? 'bg-rose-400 hover:bg-rose-300'
+                : 'bg-emerald-400 hover:bg-emerald-300'
+            "
             @click="endTurn"
           >
             FINALIZAR TURNO
@@ -729,9 +765,6 @@ function continueSavedMatch() {
         </p>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="text-xs text-slate-500">
-            Los cambios todavía se mantienen en memoria y se perderán al recargar.
-          </p>
           <button
             :disabled="!session || session.history.length === 0"
             class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
