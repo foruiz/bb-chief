@@ -6,6 +6,6 @@ import App from '../App.vue'
 describe('App', () => {
   it('mounts renders properly', () => {
     const wrapper = mount(App)
-    expect(wrapper.text()).toContain('Blood Bowl match tracker')
+    expect(wrapper.text()).toContain('Hecho para jugar')
   })
 })

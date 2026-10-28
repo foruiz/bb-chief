@@ -1,1 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
+
+@theme {
+  --color-bb-blue: #10477d;
+  --color-bb-blue-deep: #0a3155;
+  --color-bb-blue-soft: #eaf1f8;
+
+  --color-bb-red: #b51920;
+  --color-bb-red-soft: #fbecee;
+
+  --color-bb-background: #f3f5f7;
+  --color-bb-surface: #ffffff;
+  --color-bb-text: #202833;
+  --color-bb-muted: #5b6573;
+  --color-bb-border: #d7dde5;
+
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  font-family: var(--font-sans);
+  color: var(--color-bb-text);
+  background: var(--color-bb-background);
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.score-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}

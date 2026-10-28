@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import type { CreateMatchInput, MatchSession, TeamId } from './domain/models/match'
 import { createMatch } from './domain/services/create-match'
 import {
@@ -219,62 +218,95 @@ function continueSavedMatch() {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-400 selection:text-slate-950"
-  >
-    <header class="border-b border-slate-800 bg-slate-900/90">
-      <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <div class="flex items-center gap-3">
+  <div class="min-h-screen bg-bb-background text-bb-text selection:bg-bb-blue selection:text-white">
+    <!-- Cabecera -->
+    <header class="border-b border-bb-border bg-bb-blue text-white shadow-sm">
+      <div
+        class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4"
+      >
+        <div class="flex min-w-0 items-center gap-3">
           <div
-            class="flex size-11 items-center justify-center rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-xl font-black text-emerald-300"
+            class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 font-display text-2xl font-bold"
           >
             BB
           </div>
-          <div>
-            <h1 class="text-xl font-black tracking-wider sm:text-2xl">
-              BB <span class="text-emerald-400">CHIEF</span>
+          <div class="min-w-0">
+            <h1 class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">
+              BB <span class="text-red-300">Chief</span>
             </h1>
-            <p class="text-xs text-slate-400">Hecho para jugar</p>
+            <p class="text-xs text-blue-100">Hecho para jugar</p>
           </div>
         </div>
 
-        <button
-          v-if="!showSetup"
-          class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-800"
-          @click="newMatch"
-        >
-          Nueva partida
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="session && session.history.length > 0"
+            type="button"
+            @click="undo"
+            title="Deshacer última acción"
+            aria-label="Deshacer última acción"
+            class="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-600 bg-slate-800 text-slate-100 transition hover:bg-slate-700"
+          >
+            <span aria-hidden="true">↶</span>
+          </button>
+
+          <button
+            type="button"
+            @click="newMatch"
+            title="Nueva partida"
+            aria-label="Nueva partida"
+            class="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 transition hover:bg-emerald-400"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
 
+    <!-- Confirmación de nueva partida -->
     <div
       v-if="showNewMatchConfirmation"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="new-match-title"
     >
       <section
-        class="w-full max-w-md rounded-2xl border border-rose-400/40 bg-slate-900 p-6 shadow-2xl"
+        class="w-full max-w-md rounded-2xl border border-bb-border bg-bb-surface p-6 shadow-2xl"
       >
-        <h2 id="new-match-title" class="text-2xl font-black">¿Empezar una nueva partida?</h2>
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-bb-red">Confirmación</p>
+        <h2 id="new-match-title" class="mt-2 font-display text-3xl font-bold">
+          ¿Empezar una nueva partida?
+        </h2>
 
-        <p class="mt-3 text-slate-300">
+        <p class="mt-3 text-sm leading-relaxed text-bb-muted">
           La partida actual todavía no ha terminado. Si continúas, perderás su marcador, sus turnos
           y el historial para deshacer acciones.
         </p>
 
         <div class="mt-6 grid gap-3">
           <button
-            class="min-h-12 rounded-xl bg-rose-500 px-4 py-3 font-black text-white"
+            class="min-h-12 rounded-xl bg-bb-red px-4 py-3 font-bold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-red"
             @click="confirmNewMatch"
           >
             Descartar y empezar nueva
           </button>
 
           <button
-            class="min-h-12 rounded-xl border border-slate-600 px-4 py-3 font-bold text-slate-200"
+            class="min-h-12 rounded-xl border border-bb-border px-4 py-3 font-bold text-bb-text transition hover:bg-bb-background"
             @click="cancelNewMatch"
           >
             Seguir con la partida actual
@@ -283,32 +315,38 @@ function continueSavedMatch() {
       </section>
     </div>
 
+    <!-- Recuperación de partida -->
     <div
       v-if="recoveryPending"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="recovery-title"
     >
       <section
-        class="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
+        class="w-full max-w-md rounded-2xl border border-bb-border bg-bb-surface p-6 shadow-2xl"
       >
-        <h2 id="recovery-title" class="text-2xl font-black">Partida guardada</h2>
+        <div
+          class="flex size-12 items-center justify-center rounded-xl bg-bb-blue-soft text-bb-blue"
+        >
+          <span class="text-2xl" aria-hidden="true">↻</span>
+        </div>
+        <h2 id="recovery-title" class="mt-4 font-display text-3xl font-bold">Partida guardada</h2>
 
-        <p class="mt-3 text-slate-300">
+        <p class="mt-3 text-sm leading-relaxed text-bb-muted">
           Se ha encontrado una partida anterior. ¿Quieres continuarla o empezar una nueva?
         </p>
 
         <div class="mt-6 grid gap-3">
           <button
-            class="min-h-12 rounded-xl bg-emerald-400 px-4 py-3 font-black text-slate-950"
+            class="min-h-12 rounded-xl bg-bb-blue px-4 py-3 font-bold text-white transition hover:bg-bb-blue-deep"
             @click="continueSavedMatch"
           >
             Continuar partida
           </button>
 
           <button
-            class="min-h-12 rounded-xl border border-rose-400/40 px-4 py-3 font-bold text-rose-300"
+            class="min-h-12 rounded-xl border border-bb-red/30 px-4 py-3 font-bold text-bb-red transition hover:bg-bb-red-soft"
             @click="newMatch"
           >
             Descartar y empezar una nueva
@@ -318,141 +356,191 @@ function continueSavedMatch() {
     </div>
 
     <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+      <!-- Configuración -->
       <section v-if="showSetup" class="mx-auto max-w-3xl">
         <div class="mb-6">
-          <p class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-400">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-bb-blue">
             Preparación del encuentro
           </p>
-          <h2 class="mt-2 text-3xl font-black sm:text-4xl">¡Que empiece el partido!</h2>
-          <p class="mt-2 text-slate-400">Configura los equipos y prepara el marcador.</p>
+          <h2 class="mt-2 font-display text-4xl font-bold leading-tight sm:text-5xl">
+            ¡Que empiece el partido!
+          </h2>
+          <p class="mt-2 text-bb-muted">Configura los equipos y prepara el marcador.</p>
         </div>
 
         <form class="space-y-5" @submit.prevent="startMatch">
-          <section class="rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
-            <h3 class="mb-4 text-lg font-bold">Formato del partido</h3>
+          <!-- Formato -->
+          <section class="rounded-2xl border border-bb-border bg-bb-surface p-4 shadow-sm sm:p-6">
+            <h3 class="mb-4 font-display text-2xl font-bold">Formato del partido</h3>
+
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                class="rounded-xl border p-4 text-left transition"
+                class="rounded-xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
                 :class="
                   format === 'normal'
-                    ? 'border-emerald-400 bg-emerald-400/10'
-                    : 'border-slate-700 bg-slate-950 hover:border-slate-500'
+                    ? 'border-bb-blue bg-bb-blue-soft ring-1 ring-bb-blue'
+                    : 'border-bb-border bg-white hover:border-bb-blue/50 hover:bg-slate-50'
                 "
+                :aria-pressed="format === 'normal'"
                 @click="format = 'normal'"
               >
-                <span class="block font-bold">Normal</span>
-                <span class="mt-1 block text-sm text-slate-400">8 turnos por equipo</span>
+                <span class="block font-bold" :class="format === 'normal' ? 'text-bb-blue' : ''">
+                  Normal
+                </span>
+                <span class="mt-1 block text-sm text-bb-muted">8 turnos por equipo</span>
               </button>
+
               <button
                 type="button"
-                class="rounded-xl border p-4 text-left transition"
+                class="rounded-xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
                 :class="
                   format === 'sevens'
-                    ? 'border-emerald-400 bg-emerald-400/10'
-                    : 'border-slate-700 bg-slate-950 hover:border-slate-500'
+                    ? 'border-bb-blue bg-bb-blue-soft ring-1 ring-bb-blue'
+                    : 'border-bb-border bg-white hover:border-bb-blue/50 hover:bg-slate-50'
                 "
+                :aria-pressed="format === 'sevens'"
                 @click="format = 'sevens'"
               >
-                <span class="block font-bold">Sevens</span>
-                <span class="mt-1 block text-sm text-slate-400">6 turnos por equipo</span>
+                <span class="block font-bold" :class="format === 'sevens' ? 'text-bb-blue' : ''">
+                  Sevens
+                </span>
+                <span class="mt-1 block text-sm text-bb-muted">6 turnos por equipo</span>
               </button>
             </div>
           </section>
 
+          <!-- Equipos -->
           <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <section class="rounded-2xl border border-emerald-500/30 bg-slate-900 p-4 sm:p-6">
-              <div class="mb-5 flex items-center gap-3">
-                <div class="size-3 rounded-full bg-emerald-400"></div>
-                <h3 class="text-lg font-black">Equipo local</h3>
+            <!-- Local -->
+            <section
+              class="overflow-hidden rounded-2xl border border-bb-blue/25 bg-bb-surface shadow-sm"
+            >
+              <div
+                class="flex items-center gap-3 border-b border-bb-blue/15 bg-bb-blue-soft px-4 py-4 sm:px-6"
+              >
+                <div
+                  class="flex size-9 items-center justify-center rounded-lg bg-bb-blue text-sm font-bold text-white"
+                >
+                  L
+                </div>
+                <div>
+                  <h3 class="font-display text-2xl font-bold text-bb-blue">Equipo local</h3>
+                  <p class="text-xs text-bb-muted">Identidad azul</p>
+                </div>
               </div>
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300">
-                Nombre del equipo
-              </label>
-              <input
-                v-model="homeName"
-                required
-                maxlength="40"
-                placeholder="Ej. Reikland Reavers"
-                class="mb-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none transition placeholder:text-slate-600 focus:border-emerald-400"
-              />
+              <div class="p-4 sm:p-6">
+                <label for="home-name" class="mb-2 block text-sm font-semibold">
+                  Nombre del equipo
+                </label>
+                <input
+                  id="home-name"
+                  v-model="homeName"
+                  required
+                  maxlength="40"
+                  placeholder="Ej. Reikland Reavers"
+                  class="mb-4 min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-bb-blue focus:ring-2 focus:ring-bb-blue/15"
+                />
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300"> Raza </label>
-              <select
-                v-model="homeRace"
-                required
-                class="mb-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none focus:border-emerald-400"
-              >
-                <option v-for="race in races" :key="race" :value="race">{{ race }}</option>
-              </select>
+                <label for="home-race" class="mb-2 block text-sm font-semibold">Raza</label>
+                <select
+                  id="home-race"
+                  v-model="homeRace"
+                  required
+                  class="mb-4 min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none focus:border-bb-blue focus:ring-2 focus:ring-bb-blue/15"
+                >
+                  <option v-for="race in races" :key="race" :value="race">{{ race }}</option>
+                </select>
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300">
-                Segundas oportunidades iniciales
-              </label>
-              <input
-                v-model.number="homeRerolls"
-                type="number"
-                min="0"
-                max="20"
-                required
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none focus:border-emerald-400"
-              />
+                <label for="home-rerolls" class="mb-2 block text-sm font-semibold">
+                  Segundas oportunidades iniciales
+                </label>
+                <input
+                  id="home-rerolls"
+                  v-model.number="homeRerolls"
+                  type="number"
+                  min="0"
+                  max="20"
+                  required
+                  class="min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none focus:border-bb-blue focus:ring-2 focus:ring-bb-blue/15"
+                />
+              </div>
             </section>
 
-            <section class="rounded-2xl border border-rose-500/30 bg-slate-900 p-4 sm:p-6">
-              <div class="mb-5 flex items-center gap-3">
-                <div class="size-3 rounded-full bg-rose-400"></div>
-                <h3 class="text-lg font-black">Equipo visitante</h3>
+            <!-- Visitante -->
+            <section
+              class="overflow-hidden rounded-2xl border border-bb-red/25 bg-bb-surface shadow-sm"
+            >
+              <div
+                class="flex items-center gap-3 border-b border-bb-red/15 bg-bb-red-soft px-4 py-4 sm:px-6"
+              >
+                <div
+                  class="flex size-9 items-center justify-center rounded-lg bg-bb-red text-sm font-bold text-white"
+                >
+                  V
+                </div>
+                <div>
+                  <h3 class="font-display text-2xl font-bold text-bb-red">Equipo visitante</h3>
+                  <p class="text-xs text-bb-muted">Identidad roja</p>
+                </div>
               </div>
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300">
-                Nombre del equipo
-              </label>
-              <input
-                v-model="awayName"
-                required
-                maxlength="40"
-                placeholder="Ej. Gouged Eye"
-                class="mb-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none transition placeholder:text-slate-600 focus:border-rose-400"
-              />
+              <div class="p-4 sm:p-6">
+                <label for="away-name" class="mb-2 block text-sm font-semibold">
+                  Nombre del equipo
+                </label>
+                <input
+                  id="away-name"
+                  v-model="awayName"
+                  required
+                  maxlength="40"
+                  placeholder="Ej. Gouged Eye"
+                  class="mb-4 min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-bb-red focus:ring-2 focus:ring-bb-red/15"
+                />
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300"> Raza </label>
-              <select
-                v-model="awayRace"
-                required
-                class="mb-4 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none focus:border-rose-400"
-              >
-                <option v-for="race in races" :key="race" :value="race">{{ race }}</option>
-              </select>
+                <label for="away-race" class="mb-2 block text-sm font-semibold">Raza</label>
+                <select
+                  id="away-race"
+                  v-model="awayRace"
+                  required
+                  class="mb-4 min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none focus:border-bb-red focus:ring-2 focus:ring-bb-red/15"
+                >
+                  <option v-for="race in races" :key="race" :value="race">{{ race }}</option>
+                </select>
 
-              <label class="mb-2 block text-sm font-semibold text-slate-300">
-                Segundas oportunidades iniciales
-              </label>
-              <input
-                v-model.number="awayRerolls"
-                type="number"
-                min="0"
-                max="20"
-                required
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-base outline-none focus:border-rose-400"
-              />
+                <label for="away-rerolls" class="mb-2 block text-sm font-semibold">
+                  Segundas oportunidades iniciales
+                </label>
+                <input
+                  id="away-rerolls"
+                  v-model.number="awayRerolls"
+                  type="number"
+                  min="0"
+                  max="20"
+                  required
+                  class="min-h-12 w-full rounded-xl border border-bb-border bg-white px-4 py-3 text-base outline-none focus:border-bb-red focus:ring-2 focus:ring-bb-red/15"
+                />
+              </div>
             </section>
           </div>
 
-          <section class="rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
-            <h3 class="mb-3 text-lg font-bold">Equipo que patea al inicio</h3>
-            <p class="mb-4 text-sm text-slate-400">
+          <!-- Equipo pateador -->
+          <section class="rounded-2xl border border-bb-border bg-bb-surface p-4 shadow-sm sm:p-6">
+            <h3 class="font-display text-2xl font-bold">Equipo que patea al inicio</h3>
+            <p class="mb-4 mt-1 text-sm text-bb-muted">
               El equipo receptor será quien juegue el primer turno.
             </p>
+
             <button
               type="button"
-              class="mb-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 font-bold text-amber-300 transition hover:bg-amber-400/20 active:scale-[0.99]"
+              class="mb-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-amber-400 bg-amber-50 px-4 py-3 font-bold text-amber-900 transition hover:bg-amber-100 active:scale-[0.99]"
               @click="drawKickingTeam"
             >
               <span aria-hidden="true">🎲</span>
               Sortear equipo pateador
             </button>
+
             <div class="grid grid-cols-2 gap-3">
               <button
                 v-for="team in [
@@ -461,16 +549,39 @@ function continueSavedMatch() {
                 ]"
                 :key="team.id"
                 type="button"
-                class="rounded-xl border p-3 text-left font-semibold transition"
+                class="min-w-0 rounded-xl border p-3 text-left transition"
                 :class="
                   kickingTeamId === team.id
-                    ? 'border-amber-400 bg-amber-400/10 text-amber-200'
-                    : 'border-slate-700 bg-slate-950 text-slate-300 hover:border-slate-500'
+                    ? team.id === 'home'
+                      ? 'border-bb-blue bg-bb-blue-soft ring-1 ring-bb-blue'
+                      : 'border-bb-red bg-bb-red-soft ring-1 ring-bb-red'
+                    : 'border-bb-border bg-white hover:bg-slate-50'
                 "
+                :aria-pressed="kickingTeamId === team.id"
                 @click="kickingTeamId = team.id"
               >
-                <span class="block text-xs uppercase tracking-wider text-slate-500">Patea</span>
-                <span class="mt-1 block break-words">{{ team.name }}</span>
+                <span class="block text-xs font-bold uppercase tracking-wider text-bb-muted">
+                  Patea
+                </span>
+                <span
+                  class="mt-1 block break-words font-semibold"
+                  :class="
+                    kickingTeamId === team.id
+                      ? team.id === 'home'
+                        ? 'text-bb-blue'
+                        : 'text-bb-red'
+                      : 'text-bb-text'
+                  "
+                >
+                  {{ team.name }}
+                </span>
+                <span
+                  v-if="kickingTeamId === team.id"
+                  class="mt-2 block text-xs font-bold"
+                  :class="team.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
+                >
+                  Seleccionado
+                </span>
               </button>
             </div>
           </section>
@@ -478,33 +589,40 @@ function continueSavedMatch() {
           <p
             v-if="errorMessage"
             role="alert"
-            class="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-300"
+            class="rounded-xl border border-bb-red/30 bg-bb-red-soft p-3 text-sm font-medium text-bb-red"
           >
             {{ errorMessage }}
           </p>
 
           <button
             type="submit"
-            class="w-full rounded-xl bg-emerald-400 px-5 py-4 text-lg font-black text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-300 active:scale-[0.99]"
+            class="min-h-14 w-full rounded-xl bg-bb-blue px-5 py-4 font-display text-2xl font-bold uppercase tracking-wide text-white shadow-md transition hover:bg-bb-blue-deep active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
           >
             Crear partida
           </button>
         </form>
       </section>
 
+      <!-- Marcador -->
       <section v-else-if="currentMatch && activeTeam" class="space-y-5">
-        <!-- Parte centrada -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4 text-center">
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">
-            {{ currentMatch.format === 'normal' ? 'Partido normal' : 'Blood Bowl Sevens' }}
+        <!-- Parte -->
+        <div
+          class="relative overflow-hidden rounded-xl border border-bb-border bg-bb-surface px-3 py-2 text-center shadow-sm"
+        >
+          <!-- Franja superior -->
+          <div class="absolute inset-x-0 top-0 h-1 bg-bb-blue-deep"></div>
+
+          <p class="text-[10px] font-bold uppercase tracking-widest text-bb-blue">
+            {{ currentMatch.format === 'normal' ? 'Blood Bowl' : 'Blood Bowl Sevens' }}
           </p>
-          <h2 class="mt-1 text-2xl font-black sm:text-3xl">
+
+          <h2 class="mt-0.5 font-display text-xl font-bold sm:text-2xl">
             {{
               currentMatch.status === 'finished'
                 ? 'Partido finalizado'
                 : currentMatch.half === 1
-                  ? 'Primera Parte'
-                  : 'Segunda Parte'
+                  ? 'Primera parte'
+                  : 'Segunda parte'
             }}
           </h2>
         </div>
@@ -514,172 +632,162 @@ function continueSavedMatch() {
           <article
             v-for="team in teams"
             :key="team.id"
-            class="rounded-2xl border p-3 text-center sm:p-5"
-            :class="
-              team.id === 'home'
-                ? 'border-emerald-500/40 bg-slate-900'
-                : 'border-rose-500/40 bg-slate-900'
-            "
+            class="overflow-hidden rounded-2xl border bg-bb-surface text-center shadow-sm"
+            :class="team.id === 'home' ? 'border-bb-blue/30' : 'border-bb-red/30'"
           >
-            <!-- Logo provisional -->
-            <div
-              class="mx-auto flex size-14 items-center justify-center rounded-2xl text-2xl sm:size-16"
-              :class="
-                team.id === 'home'
-                  ? 'bg-emerald-400/10 text-emerald-300'
-                  : 'bg-rose-400/10 text-rose-300'
-              "
-              aria-hidden="true"
-            >
-              🛡️
+            <div class="h-1.5" :class="team.id === 'home' ? 'bg-bb-blue' : 'bg-bb-red'"></div>
+
+            <div class="p-3 sm:p-5">
+              <div
+                class="mx-auto flex size-12 items-center justify-center rounded-xl sm:size-16"
+                :class="
+                  team.id === 'home' ? 'bg-bb-blue-soft text-bb-blue' : 'bg-bb-red-soft text-bb-red'
+                "
+                aria-hidden="true"
+              >
+                <span class="text-2xl sm:text-3xl">🛡️</span>
+              </div>
+
+              <p
+                class="mt-3 break-words text-sm font-bold sm:text-lg"
+                :class="team.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
+              >
+                {{ team.name }}
+              </p>
+
+              <p class="score-number mt-2 text-6xl text-bb-text sm:text-8xl">
+                {{ team.touchdowns }}
+              </p>
+
+              <p class="mt-2 text-xs font-bold uppercase tracking-wider text-bb-muted">
+                Touchdowns
+              </p>
             </div>
-
-            <p
-              class="mt-3 break-words text-sm font-black sm:text-lg"
-              :class="team.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
-            >
-              {{ team.name }}
-            </p>
-
-            <p class="mt-2 text-5xl font-black tabular-nums sm:text-7xl">
-              {{ team.touchdowns }}
-            </p>
-
-            <p class="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Touchdowns</p>
           </article>
         </div>
 
         <!-- Panel del equipo activo -->
         <article
-          class="overflow-hidden rounded-2xl border bg-slate-900"
-          :class="activeTeam.id === 'home' ? 'border-emerald-500/50' : 'border-rose-500/50'"
+          class="overflow-hidden rounded-2xl border bg-bb-surface shadow-sm"
+          :class="activeTeam.id === 'home' ? 'border-bb-blue/40' : 'border-bb-red/40'"
         >
-          <div
-            class="p-4 sm:p-6"
-            :class="activeTeam.id === 'home' ? 'bg-emerald-400/5' : 'bg-rose-400/5'"
-          >
-            <!-- Identidad del equipo -->
+          <div class="h-1.5" :class="activeTeam.id === 'home' ? 'bg-bb-blue' : 'bg-bb-red'"></div>
+
+          <div class="p-4 sm:p-6">
+            <!-- Identidad del equipo activo -->
             <div class="flex items-center gap-3">
               <div
-                class="flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl"
+                class="flex size-14 shrink-0 items-center justify-center rounded-xl sm:size-16"
                 :class="
                   activeTeam.id === 'home'
-                    ? 'bg-emerald-400/10 text-emerald-300'
-                    : 'bg-rose-400/10 text-rose-300'
+                    ? 'bg-bb-blue-soft text-bb-blue'
+                    : 'bg-bb-red-soft text-bb-red'
                 "
                 aria-hidden="true"
               >
-                🛡️
+                <span class="text-3xl">🛡️</span>
               </div>
 
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-bb-muted">
                   Turno activo
                 </p>
                 <h3
-                  class="break-words text-xl font-black sm:text-2xl"
-                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                  class="break-words font-display text-2xl font-bold sm:text-3xl"
+                  :class="activeTeam.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                 >
                   {{ activeTeam.name }}
                 </h3>
-                <p class="mt-1 text-sm text-slate-400">{{ activeTeam.race }}</p>
+                <p class="mt-1 text-sm text-bb-muted">{{ activeTeam.race }}</p>
+              </div>
+
+              <div
+                class="hidden shrink-0 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-wide sm:block"
+                :class="
+                  activeTeam.id === 'home'
+                    ? 'bg-bb-blue-soft text-bb-blue'
+                    : 'bg-bb-red-soft text-bb-red'
+                "
+              >
+                {{ activeTeam.id === 'home' ? 'Local' : 'Visitante' }}
               </div>
             </div>
 
-            <!-- Progreso visual de turnos -->
-            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-              <div class="flex items-center justify-between gap-3">
-                <div>
-                  <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Progreso de turnos
-                  </p>
-                  <p
-                    class="mt-1 text-2xl font-black"
-                    :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
-                  >
-                    {{ Math.min(activeTeam.turnsCompleted + 1, maxTurns) }}
-                    <span class="text-base font-semibold text-slate-500">de {{ maxTurns }}</span>
-                  </p>
-                </div>
+            <!-- Finalizar turno -->
+            <button
+              class="mt-5 min-h-14 w-full rounded-xl px-5 py-4 font-display text-2xl font-bold uppercase tracking-wide text-white shadow-sm transition active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2"
+              :class="
+                activeTeam.id === 'home'
+                  ? 'bg-bb-blue hover:bg-bb-blue-deep focus-visible:outline-bb-blue'
+                  : 'bg-bb-red hover:bg-red-800 focus-visible:outline-bb-red'
+              "
+              @click="endTurn"
+            >
+              <span> Finalizar turno {{ Math.min(activeTeam.turnsCompleted + 1, maxTurns) }} </span>
 
-                <div
-                  class="rounded-lg px-3 py-2 text-sm font-black"
-                  :class="
-                    activeTeam.id === 'home'
-                      ? 'bg-emerald-400/10 text-emerald-300'
-                      : 'bg-rose-400/10 text-rose-300'
-                  "
-                >
-                  {{ Math.round((activeTeam.turnsCompleted / maxTurns) * 100) }} %
-                </div>
-              </div>
-
-              <div class="mt-4 flex gap-1.5">
+              <div class="flex w-full max-w-xs gap-1" aria-hidden="true">
                 <div
                   v-for="turn in maxTurns"
                   :key="turn"
-                  class="h-3 flex-1 rounded-sm transition-colors"
+                  class="h-1.5 flex-1 rounded-sm transition-colors"
                   :class="
                     turn <= activeTeam.turnsCompleted
                       ? activeTeam.id === 'home'
-                        ? 'bg-emerald-400'
-                        : 'bg-rose-400'
+                        ? 'bg-white'
+                        : 'bg-white'
                       : turn === activeTeam.turnsCompleted + 1
-                        ? activeTeam.id === 'home'
-                          ? 'bg-emerald-400/50 ring-1 ring-emerald-300'
-                          : 'bg-rose-400/50 ring-1 ring-rose-300'
-                        : 'bg-slate-800'
+                        ? 'bg-white/70'
+                        : 'bg-white/25'
                   "
                 ></div>
               </div>
 
-              <p class="mt-3 text-xs text-slate-400">
-                {{ activeTeam.turnsCompleted }} completados ·
-                {{ Math.max(0, maxTurns - activeTeam.turnsCompleted - 1) }} restantes después del
-                actual
+              <p class="mt-3 text-center text-xs text-slate-950/80">
+                El turno pasará al equipo que corresponda.
               </p>
-            </div>
+            </button>
 
-            <!-- Acciones principales en la misma fila -->
+            <!-- Acciones principales -->
             <div class="mt-4 grid grid-cols-2 gap-3">
               <button
                 :disabled="currentMatch.status !== 'in-progress'"
-                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl bg-emerald-400 p-3 font-black text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl p-3 font-bold text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 :class="
-                  activeTeam.id === 'away'
-                    ? 'bg-rose-400 hover:bg-rose-300'
-                    : 'bg-emerald-400 hover:bg-emerald-300'
+                  activeTeam.id === 'home'
+                    ? 'bg-bb-blue hover:bg-bb-blue-deep'
+                    : 'bg-bb-red hover:bg-red-800'
                 "
                 @click="addTouchdown(activeTeam.id)"
               >
                 <span class="text-2xl" aria-hidden="true">🏈</span>
-                <span>Touchdown</span>
+                <span class="text-base">Touchdown</span>
+                <span class="text-xs font-medium text-white/80">+1 punto</span>
               </button>
 
               <button
                 :disabled="
                   currentMatch.status !== 'in-progress' || activeTeam.rerollsAvailable === 0
                 "
-                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 transition disabled:cursor-not-allowed disabled:opacity-40"
+                class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 :class="
                   activeTeam.id === 'home'
-                    ? 'border-emerald-500/50 bg-emerald-400/5 hover:bg-emerald-400/10'
-                    : 'border-rose-500/50 bg-rose-400/5 hover:bg-rose-400/10'
+                    ? 'border-bb-blue/30 bg-bb-blue-soft hover:bg-blue-100'
+                    : 'border-bb-red/30 bg-bb-red-soft hover:bg-red-100'
                 "
                 @click="consumeReroll(activeTeam.id)"
               >
                 <span
-                  class="text-2xl font-black tabular-nums"
-                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                  class="score-number text-4xl"
+                  :class="activeTeam.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                 >
                   {{ activeTeam.rerollsAvailable }}
                 </span>
                 <span
-                  class="flex items-center justify-center gap-1 text-center text-xs font-black sm:text-sm"
-                  :class="activeTeam.id === 'home' ? 'text-emerald-300' : 'text-rose-300'"
+                  class="flex items-center justify-center gap-1 text-center text-xs font-bold sm:text-sm"
+                  :class="activeTeam.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                 >
                   <span aria-hidden="true">↻</span>
-                  <span>Usar Segunda Oportunidad</span>
+                  <span>Usar segunda oportunidad</span>
                 </span>
               </button>
             </div>
@@ -689,16 +797,25 @@ function continueSavedMatch() {
         <!-- Descanso -->
         <div
           v-if="currentMatch.status === 'halftime-pending'"
-          class="rounded-2xl border border-amber-400/50 bg-amber-400/10 p-5"
+          class="rounded-2xl border border-amber-300 bg-amber-50 p-5 sm:p-6"
           role="status"
         >
-          <h3 class="text-xl font-black text-amber-200">¡Descanso!</h3>
-          <p class="mt-2 text-sm text-slate-300">
-            Los dos equipos han completado sus turnos de la primera parte. Confirma para iniciar la
-            segunda parte.
-          </p>
+          <div class="flex items-start gap-3">
+            <div
+              class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-2xl"
+            >
+              ⏸
+            </div>
+            <div>
+              <h3 class="font-display text-2xl font-bold text-amber-950">¡Descanso!</h3>
+              <p class="mt-1 text-sm leading-relaxed text-amber-900">
+                Los dos equipos han completado sus turnos de la primera parte. Confirma para iniciar
+                la segunda parte.
+              </p>
+            </div>
+          </div>
           <button
-            class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-black text-slate-950 hover:bg-amber-300"
+            class="mt-4 min-h-12 w-full rounded-xl bg-amber-400 px-4 py-3 font-bold text-amber-950 transition hover:bg-amber-300"
             @click="startSecondHalf"
           >
             Comenzar segunda parte
@@ -708,84 +825,88 @@ function continueSavedMatch() {
         <!-- Partido finalizado -->
         <div
           v-else-if="currentMatch.status === 'finished'"
-          class="rounded-2xl border border-emerald-400/40 bg-slate-900 p-5 text-center"
+          class="overflow-hidden rounded-2xl border border-bb-blue/20 bg-bb-surface text-center shadow-sm"
           role="status"
         >
-          <p class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">
-            Partido finalizado
-          </p>
-          <p class="mt-2 text-4xl font-black">
-            {{ currentMatch.teams.home.touchdowns }}
-            <span class="text-slate-500">—</span>
-            {{ currentMatch.teams.away.touchdowns }}
-          </p>
-          <p class="mt-2 text-slate-300">
-            {{
-              currentMatch.teams.home.touchdowns === currentMatch.teams.away.touchdowns
-                ? '¡Empate!'
-                : `¡Victoria de ${
-                    currentMatch.teams.home.touchdowns > currentMatch.teams.away.touchdowns
-                      ? currentMatch.teams.home.name
-                      : currentMatch.teams.away.name
-                  }!`
-            }}
-          </p>
-          <button
-            class="mt-4 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300"
-            @click="newMatch"
-          >
-            Preparar otro partido
-          </button>
+          <div class="bg-bb-blue px-4 py-4 text-white">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-100">
+              Partido finalizado
+            </p>
+            <h3 class="mt-1 font-display text-3xl font-bold sm:text-4xl">Resultado final</h3>
+          </div>
+
+          <div class="p-5 sm:p-7">
+            <div class="flex items-center justify-center gap-4 sm:gap-8">
+              <div class="min-w-0 flex-1 text-right">
+                <p class="break-words font-bold text-bb-blue">
+                  {{ currentMatch.teams.home.name }}
+                </p>
+                <p class="text-xs text-bb-muted">Local</p>
+              </div>
+
+              <p class="score-number shrink-0 text-5xl sm:text-7xl">
+                {{ currentMatch.teams.home.touchdowns }}
+                <span class="font-sans text-3xl text-bb-muted sm:text-5xl">—</span>
+                {{ currentMatch.teams.away.touchdowns }}
+              </p>
+
+              <div class="min-w-0 flex-1 text-left">
+                <p class="break-words font-bold text-bb-red">
+                  {{ currentMatch.teams.away.name }}
+                </p>
+                <p class="text-xs text-bb-muted">Visitante</p>
+              </div>
+            </div>
+
+            <p class="mt-5 text-lg font-bold">
+              {{
+                currentMatch.teams.home.touchdowns === currentMatch.teams.away.touchdowns
+                  ? '¡Empate!'
+                  : `¡Victoria de ${
+                      currentMatch.teams.home.touchdowns > currentMatch.teams.away.touchdowns
+                        ? currentMatch.teams.home.name
+                        : currentMatch.teams.away.name
+                    }!`
+              }}
+            </p>
+
+            <button
+              class="mt-5 min-h-12 rounded-xl bg-bb-blue px-5 py-3 font-bold text-white transition hover:bg-bb-blue-deep"
+              @click="newMatch"
+            >
+              Preparar otro partido
+            </button>
+          </div>
         </div>
 
-        <!-- Finalizar turno -->
-        <div v-else class="rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
-          <button
-            class="w-full rounded-xl bg-emerald-400 px-5 py-4 text-lg font-black text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-300 active:scale-[0.99]"
-            :class="
-              activeTeam.id === 'away'
-                ? 'bg-rose-400 hover:bg-rose-300'
-                : 'bg-emerald-400 hover:bg-emerald-300'
-            "
-            @click="endTurn"
-          >
-            FINALIZAR TURNO
-          </button>
-          <p class="mt-3 text-center text-sm text-slate-400">
-            El turno pasará al equipo que corresponda.
-          </p>
-        </div>
-
+        <!-- Errores -->
         <p
           v-if="errorMessage"
           role="alert"
-          class="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-300"
+          class="rounded-xl border border-bb-red/30 bg-bb-red-soft p-3 text-sm font-medium text-bb-red"
         >
           {{ errorMessage }}
         </p>
-
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <button
-            :disabled="!session || session.history.length === 0"
-            class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
-            @click="undo"
-          >
-            ↶ Deshacer última acción
-          </button>
-        </div>
       </section>
 
+      <!-- Avisos de almacenamiento -->
       <p
         v-if="storageWarning"
         role="alert"
-        class="mb-4 rounded-lg border border-amber-400/40 bg-amber-400/10 p-3 text-sm text-amber-200"
+        class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-950"
       >
         {{ storageWarning }}
       </p>
     </main>
 
-    <footer class="border-t border-slate-800 px-4 py-5 text-center text-xs text-slate-600">
-      BB CHIEF · Blood Bowl 2020 · Hecho para jugar
+    <footer
+      class="border-t border-bb-border bg-bb-surface px-4 py-5 text-center text-xs text-bb-muted"
+    >
+      <span class="font-display font-bold tracking-wide text-bb-blue">BB CHIEF</span>
+      <span class="mx-1">·</span>
+      Blood Bowl 2020
+      <span class="mx-1">·</span>
+      Hecho para jugar
     </footer>
   </div>
 </template>
