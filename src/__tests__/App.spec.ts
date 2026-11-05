@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App.vue'
+import { i18n } from '../i18n'
 
 describe('App', () => {
   it('mounts renders properly', async () => {
@@ -19,7 +20,7 @@ describe('App', () => {
 
     const wrapper = mount(App, {
       global: {
-        plugins: [router],
+        plugins: [router, i18n],
       },
     })
 

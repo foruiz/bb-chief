@@ -1,0 +1,186 @@
+{
+  "app": {
+    "tagline": "Hecho para jugar",
+    "language": "Seleccionar idioma",
+    "logoLabel": "BB Chief, ir a configuración"
+  },
+  "recovery": {
+    "title": "Partida guardada",
+    "description": "Se ha encontrado una partida anterior. ¿Quieres continuarla o empezar una nueva?",
+    "continue": "Continuar partida",
+    "discard": "Descartar y empezar una nueva"
+  },
+  "match": {
+    "confirmNew": {
+      "title": "¿Empezar una nueva partida?",
+      "description": "La partida actual todavía no ha terminado. Si continúas, perderás su marcador, sus turnos y el historial para deshacer acciones.",
+      "confirm": "Descartar y empezar nueva",
+      "cancel": "Seguir con la partida actual"
+    }
+  },
+  "storage": {
+    "saveError": "No se ha podido guardar la partida. Comprueba el almacenamiento del navegador.",
+    "readError": "No se ha podido leer la partida guardada. Puedes iniciar una nueva.",
+    "unavailable": "El almacenamiento local no está disponible en este navegador.",
+    "deleteError": "No se ha podido borrar la partida guardada. Comprueba el almacenamiento del navegador."
+  },
+  "errors": {
+    "TEAM_NAME_REQUIRED": "El nombre del equipo es obligatorio.",
+    "TEAM_RACE_REQUIRED": "La raza del equipo es obligatoria.",
+    "INVALID_REROLLS": "Las segundas oportunidades deben ser un entero no negativo.",
+    "MATCH_NOT_ACTIVE": "La partida no admite esta acción en su estado actual.",
+    "TEAM_TURNS_COMPLETED": "El equipo ya ha completado todos sus turnos de esta parte.",
+    "TOUCHDOWN_NOT_ACTIVE_TEAM": "Solo el equipo activo puede anotar un touchdown.",
+    "NO_REROLLS_AVAILABLE": "El equipo no tiene segundas oportunidades disponibles.",
+    "HALFTIME_NOT_PENDING": "No hay un descanso pendiente de confirmar.",
+    "INVALID_TOUCHDOWNS": "El número de touchdowns debe ser un entero no negativo.",
+    "UNKNOWN_ERROR": "Se ha producido un error inesperado."
+  },
+  "matchView": {
+    "status": {
+      "finished": "Partido finalizado",
+      "halftime": "Descanso",
+      "firstHalf": "Primera parte",
+      "secondHalf": "Segunda parte"
+    },
+    "score": {
+      "touchdowns": "Touchdowns",
+      "home": "Local",
+      "away": "Visitante",
+      "draw": "¡Empate!",
+      "victory": "¡Victoria de {team}!"
+    },
+    "active": {
+      "turn": "Turno activo",
+      "scoreTouchdown": "Anotar Touchdown",
+      "useReroll": "Usar Segunda Oportunidad",
+      "finishTurn": "Finalizar turno {turn}",
+      "endTurnHint": "El turno pasará al equipo que corresponda."
+    },
+    "halftime": {
+      "completed": "Primera parte completada",
+      "title": "¡Descanso!",
+      "description": "Los dos equipos han completado sus turnos de la primera parte. Confirma para iniciar la segunda parte.",
+      "start": "Comenzar segunda parte"
+    },
+    "finished": {
+      "title": "Resultado final"
+    },
+    "options": {
+      "title": "Opciones del partido",
+      "show": "Mostrar opciones del partido",
+      "backToScore": "Volver al marcador",
+      "help": "Ayuda",
+      "helpComingSoon": "Ayuda (próximamente)",
+      "comingSoon": "Próximamente",
+      "undo": "Deshacer última acción",
+      "exit": "Salir",
+      "exitHint": "Salir abrirá la confirmación si la partida todavía está en curso."
+    },
+    "accessibility": {
+      "teamCard": "Tarjeta de {team}",
+      "halftimeCard": "Tarjeta de descanso",
+      "finishedCard": "Tarjeta de partido finalizado"
+    }
+  },
+  "matchSetup": {
+    "title": "Preparación del partido",
+    "subtitle": "Configura el encuentro antes de saltar al terreno de juego.",
+    "step": "Paso {current} de {total}",
+    "progress": "Progreso de la configuración",
+    "steps": {
+      "format": "Formato",
+      "home": "Equipo local",
+      "away": "Equipo visitante",
+      "kickingTeam": "Equipo pateador",
+      "summary": "Resumen"
+    },
+    "format": {
+      "title": "¿Qué modalidad vais a jugar?",
+      "description": "Selecciona el formato del encuentro.",
+      "normal": {
+        "title": "Partido normal",
+        "description": "El formato estándar de Blood Bowl."
+      },
+      "sevens": {
+        "title": "Sevens",
+        "description": "La variante rápida de siete jugadores."
+      }
+    },
+    "selected": "Seleccionado",
+    "teams": {
+      "home": "Equipo local",
+      "away": "Equipo visitante"
+    },
+    "teamDescription": {
+      "home": "Introduce los datos del primer equipo.",
+      "away": "Introduce los datos del segundo equipo."
+    },
+    "teamName": "Nombre del equipo",
+    "race": "Raza",
+    "rerolls": "Segundas oportunidades",
+    "rerollsForTeam": "Segundas oportunidades del {team}",
+    "placeholders": {
+      "homeName": "Ej. Reikland Reavers",
+      "awayName": "Ej. Gouged Eye"
+    },
+    "races": {
+      "amazons": "Amazonas",
+      "highElves": "Altos Elfos",
+      "oldWorldAlliance": "Alianza del Viejo Mundo",
+      "chaos": "Caos",
+      "dwarfs": "Enanos",
+      "darkElves": "Elfos Oscuros",
+      "woodElves": "Elfos Silvanos",
+      "chaosChosen": "Elegidos del Caos",
+      "chaosDwarfs": "Enanos del Caos",
+      "humans": "Humanos",
+      "imperialNobility": "Nobleza Imperial",
+      "lizardmen": "Hombres Lagarto",
+      "khorne": "Khorne",
+      "undead": "Muertos Vivientes",
+      "norse": "Nórdicos",
+      "nurgle": "Nurgle",
+      "ogre": "Ogro",
+      "orcs": "Orcos",
+      "chaosRenegades": "Pacto del Caos",
+      "skaven": "Skaven",
+      "snotlings": "Snotlings",
+      "vampires": "Vampiros",
+      "elvenUnion": "Unión Élfica",
+      "underworldDenizens": "Inframundo",
+      "other": "Otro"
+    },
+    "validation": {
+      "homeName": "Introduce el nombre del equipo local.",
+      "awayName": "Introduce el nombre del equipo visitante.",
+      "rerolls": "Las segundas oportunidades del {team} deben ser un número entero entre 0 y 20."
+    },
+    "kickingTeam": {
+      "title": "¿Quién patea primero?",
+      "description": "Selecciona el equipo que realiza la patada inicial. Podéis elegirlo manualmente o al azar.",
+      "kicksFirst": "Patea primero",
+      "receives": "Receptor",
+      "random": "Elegir equipo pateador al azar",
+      "currentSelection": "Selección actual:"
+    },
+    "summary": {
+      "title": "Resumen del partido",
+      "description": "Revisa la configuración antes de comenzar el partido.",
+      "format": "Formato",
+      "rerolls": "Segundas oportunidades: {count}",
+      "kickingTeam": "Equipo que patea primero",
+      "editHint": "Si necesitas corregir algún dato, pulsa «Anterior» para volver al paso correspondiente."
+    },
+    "errors": {
+      "create": "No se pudo crear la partida.",
+      "openScoreboard": "No se pudo abrir el marcador. Comprueba la navegación e inténtalo de nuevo."
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "creating": "Comenzar partido…",
+      "startMatch": "Comenzar partido"
+    }
+  }
+}
