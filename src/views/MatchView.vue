@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMatchSession } from '../composables/useMatchSession'
 
 import OptionsIcon from '../assets/icons/options.png'
 import PitchIcon from '../assets/icons/pitch.png'
+
+const { t } = useI18n()
 
 const {
   session,
@@ -12,7 +15,6 @@ const {
   teams,
   activeTeam,
   errorMessage,
-  initializeSession,
   addTouchdown,
   consumeReroll,
   endTurn,
@@ -33,10 +35,6 @@ watch(
 function toggleCardFace() {
   showBack.value = !showBack.value
 }
-
-onMounted(() => {
-  initializeSession()
-})
 </script>
 
 <template>
@@ -57,12 +55,12 @@ onMounted(() => {
           <h2 class="mt-0.5 font-display text-xl font-bold sm:text-2xl">
             {{
               currentMatch.status === 'finished'
-                ? 'Partido finalizado'
+                ? t('matchView.status.finished')
                 : currentMatch.status === 'halftime-pending'
-                  ? 'Descanso'
+                  ? t('matchView.status.halftime')
                   : currentMatch.half === 1
-                    ? 'Primera parte'
-                    : 'Segunda parte'
+                    ? t('matchView.status.firstHalf')
+                    : t('matchView.status.secondHalf')
             }}
           </h2>
         </div>
@@ -102,7 +100,7 @@ onMounted(() => {
               <p
                 class="match-team-label mt-2 text-xs font-bold uppercase tracking-wider text-bb-muted"
               >
-                Touchdowns
+                {{ t('matchView.score.touchdowns') }}
               </p>
             </div>
           </article>
@@ -116,10 +114,10 @@ onMounted(() => {
           :class="{ 'is-flipped': showBack }"
           :aria-label="
             currentMatch.status === 'in-progress' && activeTeam
-              ? `Tarjeta de ${activeTeam.name}`
+              ? t('matchView.accessibility.teamCard', { team: activeTeam.name })
               : currentMatch.status === 'halftime-pending'
-                ? 'Tarjeta de descanso'
-                : 'Tarjeta de partido finalizado'
+                ? t('matchView.accessibility.halftimeCard')
+                : t('matchView.accessibility.finishedCard')
           "
         >
           <!-- Cara frontal -->
@@ -152,7 +150,7 @@ onMounted(() => {
 
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-bb-muted">
-                      Turno activo
+                      {{ t('matchView.active.turn') }}
                     </p>
 
                     <h3
@@ -175,8 +173,8 @@ onMounted(() => {
                         ? 'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue'
                         : 'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red'
                     "
-                    aria-label="Mostrar opciones del partido"
-                    title="Mostrar opciones del partido"
+                    :aria-label="t('matchView.options.show')"
+                    :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
                     <img
@@ -202,7 +200,9 @@ onMounted(() => {
                     @click="addTouchdown(activeTeam.id)"
                   >
                     <span class="text-2xl" aria-hidden="true">🏈</span>
-                    <span class="text-sm font-black">Anotar Touchdown</span>
+                    <span class="text-sm font-black">
+                      {{ t('matchView.active.scoreTouchdown') }}
+                    </span>
                   </button>
 
                   <button
@@ -226,7 +226,9 @@ onMounted(() => {
                       {{ activeTeam.rerollsAvailable }} 🎲
                     </span>
 
-                    <span class="text-sm font-black">Usar Segunda Oportunidad</span>
+                    <span class="text-sm font-black">
+                      {{ t('matchView.active.useReroll') }}
+                    </span>
                   </button>
                 </div>
 
@@ -243,7 +245,11 @@ onMounted(() => {
                   @click="endTurn"
                 >
                   <span>
-                    Finalizar turno {{ Math.min(activeTeam.turnsCompleted + 1, maxTurns) }}
+                    {{
+                      t('matchView.active.finishTurn', {
+                        turn: Math.min(activeTeam.turnsCompleted + 1, maxTurns),
+                      })
+                    }}
                   </span>
 
                   <div class="mx-auto flex w-full max-w-xs gap-1" aria-hidden="true">
@@ -262,7 +268,7 @@ onMounted(() => {
                   </div>
 
                   <p class="match-end-hint mt-3 text-center text-xs text-slate-950/80">
-                    El turno pasará al equipo que corresponda.
+                    {{ t('matchView.active.endTurnHint') }}
                   </p>
                 </button>
               </template>
@@ -279,24 +285,23 @@ onMounted(() => {
 
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-bb-muted">
-                      Primera parte completada
+                      {{ t('matchView.halftime.completed') }}
                     </p>
 
                     <h3 class="font-display text-2xl font-bold text-amber-950 sm:text-3xl">
-                      ¡Descanso!
+                      {{ t('matchView.halftime.title') }}
                     </h3>
 
                     <p class="mt-1 text-sm leading-relaxed text-bb-muted">
-                      Los dos equipos han completado sus turnos de la primera parte. Confirma para
-                      iniciar la segunda parte.
+                      {{ t('matchView.halftime.description') }}
                     </p>
                   </div>
 
                   <button
                     type="button"
                     class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-bb-blue/30 bg-bb-blue-soft text-bb-blue transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
-                    aria-label="Mostrar opciones del partido"
-                    title="Mostrar opciones del partido"
+                    :aria-label="t('matchView.options.show')"
+                    :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
                     <img
@@ -313,7 +318,7 @@ onMounted(() => {
                   class="match-secondary-action mt-4 min-h-12 w-full rounded-xl bg-amber-400 px-4 py-3 font-bold text-amber-950 transition hover:bg-amber-300"
                   @click="startSecondHalf"
                 >
-                  Comenzar segunda parte
+                  {{ t('matchView.halftime.start') }}
                 </button>
               </template>
 
@@ -329,19 +334,19 @@ onMounted(() => {
 
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-bb-muted">
-                      Partido finalizado
+                      {{ t('matchView.status.finished') }}
                     </p>
 
                     <h3 class="font-display text-2xl font-bold text-bb-blue sm:text-3xl">
-                      Resultado final
+                      {{ t('matchView.finished.title') }}
                     </h3>
                   </div>
 
                   <button
                     type="button"
                     class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-bb-blue/30 bg-bb-blue-soft text-bb-blue transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
-                    aria-label="Mostrar opciones del partido"
-                    title="Mostrar opciones del partido"
+                    :aria-label="t('matchView.options.show')"
+                    :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
                     <img
@@ -359,7 +364,9 @@ onMounted(() => {
                       <p class="break-words font-bold text-bb-blue">
                         {{ currentMatch.teams.home.name }}
                       </p>
-                      <p class="text-xs text-bb-muted">Local</p>
+                      <p class="text-xs text-bb-muted">
+                        {{ t('matchView.score.home') }}
+                      </p>
                     </div>
 
                     <p class="score-number shrink-0 text-5xl sm:text-7xl">
@@ -372,19 +379,23 @@ onMounted(() => {
                       <p class="break-words font-bold text-bb-red">
                         {{ currentMatch.teams.away.name }}
                       </p>
-                      <p class="text-xs text-bb-muted">Visitante</p>
+                      <p class="text-xs text-bb-muted">
+                        {{ t('matchView.score.away') }}
+                      </p>
                     </div>
                   </div>
 
                   <p class="mt-5 text-lg font-bold">
                     {{
                       currentMatch.teams.home.touchdowns === currentMatch.teams.away.touchdowns
-                        ? '¡Empate!'
-                        : `¡Victoria de ${
-                            currentMatch.teams.home.touchdowns > currentMatch.teams.away.touchdowns
-                              ? currentMatch.teams.home.name
-                              : currentMatch.teams.away.name
-                          }!`
+                        ? t('matchView.score.draw')
+                        : t('matchView.score.victory', {
+                            team:
+                              currentMatch.teams.home.touchdowns >
+                              currentMatch.teams.away.touchdowns
+                                ? currentMatch.teams.home.name
+                                : currentMatch.teams.away.name,
+                          })
                     }}
                   </p>
                 </div>
@@ -412,7 +423,7 @@ onMounted(() => {
                     class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl"
                     :class="activeTeam?.id === 'away' ? 'text-bb-red' : 'text-bb-blue'"
                   >
-                    Opciones del partido
+                    {{ t('matchView.options.title') }}
                   </h3>
                 </div>
 
@@ -424,8 +435,8 @@ onMounted(() => {
                       ? 'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red'
                       : 'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue'
                   "
-                  aria-label="Volver al marcador"
-                  title="Volver al marcador"
+                  :aria-label="t('matchView.options.backToScore')"
+                  :title="t('matchView.options.backToScore')"
                   @click="toggleCardFace"
                 >
                   <img
@@ -442,12 +453,14 @@ onMounted(() => {
                 <button
                   type="button"
                   disabled
-                  aria-label="Ayuda (próximamente)"
-                  title="Próximamente"
+                  :aria-label="t('matchView.options.helpComingSoon')"
+                  :title="t('matchView.options.comingSoon')"
                   class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-bb-border bg-bb-background p-2 text-bb-muted opacity-60"
                 >
                   <span class="text-3xl" aria-hidden="true">❔</span>
-                  <span class="text-sm font-bold">Ayuda</span>
+                  <span class="text-sm font-bold">
+                    {{ t('matchView.options.help') }}
+                  </span>
                 </button>
 
                 <button
@@ -457,7 +470,9 @@ onMounted(() => {
                   @click="undo"
                 >
                   <span class="text-3xl" aria-hidden="true">↶</span>
-                  <span class="text-sm">Deshacer última acción</span>
+                  <span class="text-sm">
+                    {{ t('matchView.options.undo') }}
+                  </span>
                 </button>
 
                 <button
@@ -466,12 +481,14 @@ onMounted(() => {
                   @click="prepareNewMatch"
                 >
                   <span class="text-3xl" aria-hidden="true">↩</span>
-                  <span class="text-sm">Salir</span>
+                  <span class="text-sm">
+                    {{ t('matchView.options.exit') }}
+                  </span>
                 </button>
               </div>
 
               <p class="mt-auto pt-5 text-center text-xs text-bb-muted">
-                Salir abrirá la confirmación si la partida todavía está en curso.
+                {{ t('matchView.options.exitHint') }}
               </p>
             </div>
           </section>
@@ -484,7 +501,7 @@ onMounted(() => {
         role="alert"
         class="match-error rounded-xl border border-bb-red/30 bg-bb-red-soft p-3 text-sm font-medium text-bb-red"
       >
-        {{ errorMessage }}
+        {{ t(`errors.${errorMessage}`) }}
       </p>
     </section>
   </main>

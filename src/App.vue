@@ -1,9 +1,13 @@
+```vue
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { setLocale, type Locale } from './i18n'
 import { useMatchSession } from './composables/useMatchSession'
 
 const route = useRoute()
+const { t, locale } = useI18n()
 
 const {
   recoveryPending,
@@ -16,6 +20,10 @@ const {
   continueAndOpenMatch,
   prepareNewMatch,
 } = useMatchSession()
+
+function changeLocale(newLocale: Locale) {
+  setLocale(newLocale)
+}
 
 async function updateOrientation() {
   if (route.name === 'setup') {
@@ -64,7 +72,7 @@ onBeforeUnmount(() => {
         <button
           type="button"
           class="flex min-w-0 items-center gap-3 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          aria-label="BB Chief, ir a configuración"
+          :aria-label="t('app.logoLabel')"
           @click="prepareNewMatch"
         >
           <div
@@ -78,9 +86,36 @@ onBeforeUnmount(() => {
             <h1 class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">
               BB <span class="text-red-300">Chief</span>
             </h1>
-            <p class="text-xs text-blue-100">Hecho para jugar</p>
+            <p class="text-xs text-blue-100">{{ t('app.tagline') }}</p>
           </div>
         </button>
+
+        <!-- Selector de idioma -->
+        <div
+          class="flex shrink-0 items-center gap-1 rounded-lg border border-white/20 bg-white/10 p-1"
+          role="group"
+          :aria-label="t('app.language')"
+        >
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-xs font-bold transition"
+            :class="locale === 'es' ? 'bg-white text-bb-blue' : 'text-white hover:bg-white/10'"
+            :aria-pressed="locale === 'es'"
+            @click="changeLocale('es')"
+          >
+            ES
+          </button>
+
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-xs font-bold transition"
+            :class="locale === 'en' ? 'bg-white text-bb-blue' : 'text-white hover:bg-white/10'"
+            :aria-pressed="locale === 'en'"
+            @click="changeLocale('en')"
+          >
+            EN
+          </button>
+        </div>
       </div>
     </header>
 
@@ -89,7 +124,7 @@ onBeforeUnmount(() => {
       <p
         class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-950"
       >
-        {{ storageWarning }}
+        {{ t(`storage.${storageWarning}`) }}
       </p>
     </div>
 
@@ -112,10 +147,12 @@ onBeforeUnmount(() => {
           aria-modal="true"
           aria-labelledby="recovery-title"
         >
-          <h2 id="recovery-title" class="mt-4 font-display text-3xl font-bold">Partida guardada</h2>
+          <h2 id="recovery-title" class="mt-4 font-display text-3xl font-bold">
+            {{ t('recovery.title') }}
+          </h2>
 
           <p class="mt-3 text-sm leading-relaxed text-bb-muted">
-            Se ha encontrado una partida anterior. ¿Quieres continuarla o empezar una nueva?
+            {{ t('recovery.description') }}
           </p>
 
           <div class="mt-6 grid gap-3">
@@ -124,7 +161,7 @@ onBeforeUnmount(() => {
               class="min-h-12 rounded-xl bg-bb-blue px-4 py-3 font-bold text-white transition hover:bg-bb-blue-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
               @click="continueAndOpenMatch"
             >
-              Continuar partida
+              {{ t('recovery.continue') }}
             </button>
 
             <button
@@ -132,7 +169,7 @@ onBeforeUnmount(() => {
               class="min-h-12 rounded-xl border border-bb-red/30 px-4 py-3 font-bold text-bb-red transition hover:bg-bb-red-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-red"
               @click="discardSavedAndPrepareNewMatch"
             >
-              Descartar y empezar una nueva
+              {{ t('recovery.discard') }}
             </button>
           </div>
         </section>
@@ -154,12 +191,11 @@ onBeforeUnmount(() => {
           aria-labelledby="new-match-title"
         >
           <h2 id="new-match-title" class="mt-2 font-display text-3xl font-bold">
-            ¿Empezar una nueva partida?
+            {{ t('match.confirmNew.title') }}
           </h2>
 
           <p class="mt-3 text-sm leading-relaxed text-bb-muted">
-            La partida actual todavía no ha terminado. Si continúas, perderás su marcador, sus
-            turnos y el historial para deshacer acciones.
+            {{ t('match.confirmNew.description') }}
           </p>
 
           <div class="mt-6 grid gap-3">
@@ -168,7 +204,7 @@ onBeforeUnmount(() => {
               class="min-h-12 rounded-xl bg-bb-red px-4 py-3 font-bold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-red"
               @click="confirmAndPrepareNewMatch"
             >
-              Descartar y empezar nueva
+              {{ t('match.confirmNew.confirm') }}
             </button>
 
             <button
@@ -176,7 +212,7 @@ onBeforeUnmount(() => {
               class="min-h-12 rounded-xl border border-bb-border px-4 py-3 font-bold text-bb-text transition hover:bg-bb-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
               @click="cancelNewMatch"
             >
-              Seguir con la partida actual
+              {{ t('match.confirmNew.cancel') }}
             </button>
           </div>
         </section>
@@ -220,3 +256,4 @@ onBeforeUnmount(() => {
   }
 }
 </style>
+```

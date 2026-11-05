@@ -13,13 +13,15 @@ import {
 } from '../domain/services/match-actions'
 import { clearSavedSession, loadSession, saveSession } from '../persistence/match-storage'
 
+export type StorageWarning = 'saveError' | 'readError' | 'unavailable' | 'deleteError' | null
+
 // Estado compartido: se crea una sola vez para toda la aplicación.
 const session = ref<MatchSession | null>(null)
 const pendingSession = ref<MatchSession | null>(null)
 const recoveryPending = ref(false)
 const showNewMatchConfirmation = ref(false)
 const errorMessage = ref('')
-const storageWarning = ref('')
+const storageWarning = ref<StorageWarning>(null)
 
 let initialized = false
 
@@ -53,10 +55,9 @@ function initializeSession() {
 
       try {
         saveSession(current)
-        storageWarning.value = ''
+        storageWarning.value = null
       } catch {
-        storageWarning.value =
-          'No se ha podido guardar la partida. Comprueba el almacenamiento del navegador.'
+        storageWarning.value = 'saveError'
       }
     },
     { deep: true },
@@ -69,10 +70,12 @@ function initializeSession() {
       pendingSession.value = result.session
       recoveryPending.value = true
     } else if (result.status === 'invalid') {
-      storageWarning.value = 'No se ha podido leer la partida guardada. Puedes iniciar una nueva.'
+      storageWarning.value = 'readError'
+    } else if (result.status === 'unavailable') {
+      storageWarning.value = 'unavailable'
     }
   } catch {
-    storageWarning.value = 'El almacenamiento local no está disponible en este navegador.'
+    storageWarning.value = 'unavailable'
   }
 }
 
@@ -124,8 +127,7 @@ function beginNewMatch() {
   try {
     clearSavedSession()
   } catch {
-    storageWarning.value =
-      'No se ha podido borrar la partida guardada. Comprueba el almacenamiento del navegador.'
+    storageWarning.value = 'deleteError'
     return false
   }
 
@@ -133,7 +135,7 @@ function beginNewMatch() {
   pendingSession.value = null
   recoveryPending.value = false
   showNewMatchConfirmation.value = false
-  storageWarning.value = ''
+  storageWarning.value = null
   errorMessage.value = ''
 
   return true

@@ -1,37 +1,41 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMatchSession } from '../composables/useMatchSession'
 import type { CreateMatchInput, TeamId } from '../domain/models/match'
 
+const { t, te } = useI18n()
 const { createAndOpenMatch, errorMessage: sessionError } = useMatchSession()
 
+// Se mantienen los valores originales para no modificar los datos
+// que se guardan en el dominio. Solo cambia la etiqueta visible.
 const races = [
-  'Amazonas',
-  'Altos Elfos',
-  'Alianza del Viejo Mundo',
-  'Caos',
-  'Enanos',
-  'Elfos Oscuros',
-  'Elfos Silvanos',
-  'Elegidos del Caos',
-  'Enanos del Caos',
-  'Humanos',
-  'Imperial Nobility',
-  'Hombres Lagarto',
-  'Khorne',
-  'Muertos Vivientes',
-  'Nórdicos',
-  'Nurgle',
-  'Ogro',
-  'Orcos',
-  'Pacto del Caos',
-  'Skaven',
-  'Snotlings',
-  'Vampiros',
-  'Unión Élfica',
-  'Inframundo',
-  'Otro',
-]
+  { value: 'Amazonas', key: 'amazons' },
+  { value: 'Altos Elfos', key: 'highElves' },
+  { value: 'Alianza del Viejo Mundo', key: 'oldWorldAlliance' },
+  { value: 'Caos', key: 'chaos' },
+  { value: 'Enanos', key: 'dwarfs' },
+  { value: 'Elfos Oscuros', key: 'darkElves' },
+  { value: 'Elfos Silvanos', key: 'woodElves' },
+  { value: 'Elegidos del Caos', key: 'chaosChosen' },
+  { value: 'Enanos del Caos', key: 'chaosDwarfs' },
+  { value: 'Humanos', key: 'humans' },
+  { value: 'Imperial Nobility', key: 'imperialNobility' },
+  { value: 'Hombres Lagarto', key: 'lizardmen' },
+  { value: 'Khorne', key: 'khorne' },
+  { value: 'Muertos Vivientes', key: 'undead' },
+  { value: 'Nórdicos', key: 'norse' },
+  { value: 'Nurgle', key: 'nurgle' },
+  { value: 'Ogro', key: 'ogre' },
+  { value: 'Orcos', key: 'orcs' },
+  { value: 'Pacto del Caos', key: 'chaosRenegades' },
+  { value: 'Skaven', key: 'skaven' },
+  { value: 'Snotlings', key: 'snotlings' },
+  { value: 'Vampiros', key: 'vampires' },
+  { value: 'Unión Élfica', key: 'elvenUnion' },
+  { value: 'Inframundo', key: 'underworldDenizens' },
+  { value: 'Otro', key: 'other' },
+] as const
 
 const format = ref<CreateMatchInput['format']>('normal')
 const currentStep = ref(1)
@@ -50,9 +54,35 @@ const isCreating = ref(false)
 
 const totalSteps = 5
 
+const currentStepLabel = computed(() => {
+  const steps = [
+    'matchSetup.steps.format',
+    'matchSetup.steps.home',
+    'matchSetup.steps.away',
+    'matchSetup.steps.kickingTeam',
+    'matchSetup.steps.summary',
+  ]
+
+  return t(steps[currentStep.value - 1] ?? 'matchSetup.steps.format')
+})
+
+const sessionErrorText = computed(() => {
+  const code = sessionError.value
+
+  if (!code) return ''
+
+  return te(`errors.${code}`) ? t(`errors.${code}`) : t('errors.UNKNOWN_ERROR')
+})
+
+function raceLabel(race: string): string {
+  const raceOption = races.find((option) => option.value === race)
+
+  return raceOption ? t(`matchSetup.races.${raceOption.key}`) : race
+}
+
 function validateRerolls(value: number, teamName: string): string | null {
   if (!Number.isInteger(value) || value < 0 || value > 20) {
-    return `Las segundas oportunidades del ${teamName} deben ser un número entero entre 0 y 20.`
+    return t('matchSetup.validation.rerolls', { team: teamName })
   }
 
   return null
@@ -60,11 +90,11 @@ function validateRerolls(value: number, teamName: string): string | null {
 
 function validateHome(): boolean {
   if (!homeName.value.trim()) {
-    errorMessage.value = 'Introduce el nombre del equipo local.'
+    errorMessage.value = t('matchSetup.validation.homeName')
     return false
   }
 
-  const rerollsError = validateRerolls(homeRerolls.value, 'equipo local')
+  const rerollsError = validateRerolls(homeRerolls.value, t('matchSetup.teams.home').toLowerCase())
 
   if (rerollsError) {
     errorMessage.value = rerollsError
@@ -76,11 +106,11 @@ function validateHome(): boolean {
 
 function validateAway(): boolean {
   if (!awayName.value.trim()) {
-    errorMessage.value = 'Introduce el nombre del equipo visitante.'
+    errorMessage.value = t('matchSetup.validation.awayName')
     return false
   }
 
-  const rerollsError = validateRerolls(awayRerolls.value, 'equipo visitante')
+  const rerollsError = validateRerolls(awayRerolls.value, t('matchSetup.teams.away').toLowerCase())
 
   if (rerollsError) {
     errorMessage.value = rerollsError
@@ -165,11 +195,10 @@ async function createMatch() {
     const created = await createAndOpenMatch(input)
 
     if (!created) {
-      errorMessage.value = sessionError.value || 'No se pudo crear la partida.'
+      errorMessage.value = sessionErrorText.value || t('matchSetup.errors.create')
     }
   } catch {
-    errorMessage.value =
-      'No se pudo abrir el marcador. Comprueba la navegación e inténtalo de nuevo.'
+    errorMessage.value = t('matchSetup.errors.openScoreboard')
   } finally {
     isCreating.value = false
   }
@@ -180,11 +209,11 @@ async function createMatch() {
   <main class="mx-auto w-full max-w-2xl px-3 py-2 sm:px-6 sm:py-3">
     <header class="mb-3">
       <h1 class="mt-1 font-display text-2xl font-bold text-bb-text sm:text-3xl">
-        Preparación del partido
+        {{ t('matchSetup.title') }}
       </h1>
 
       <p class="mt-1 text-xs text-bb-muted sm:text-sm">
-        Configura el encuentro antes de saltar al terreno de juego.
+        {{ t('matchSetup.subtitle') }}
       </p>
     </header>
 
@@ -194,28 +223,18 @@ async function createMatch() {
     >
       <div class="mb-3 flex items-center justify-between gap-3">
         <span class="text-xs font-medium text-bb-muted sm:text-sm">
-          Paso {{ currentStep }} de {{ totalSteps }}
+          {{ t('matchSetup.step', { current: currentStep, total: totalSteps }) }}
         </span>
 
         <span class="text-right text-xs font-semibold text-bb-blue sm:text-sm">
-          {{
-            currentStep === 1
-              ? 'Formato'
-              : currentStep === 2
-                ? 'Equipo local'
-                : currentStep === 3
-                  ? 'Equipo visitante'
-                  : currentStep === 4
-                    ? 'Equipo pateador'
-                    : 'Resumen'
-          }}
+          {{ currentStepLabel }}
         </span>
       </div>
 
       <div
         class="mb-4 h-1 overflow-hidden rounded-full bg-bb-background"
         role="progressbar"
-        aria-label="Progreso de la configuración"
+        :aria-label="t('matchSetup.progress')"
         :aria-valuenow="currentStep"
         :aria-valuemin="1"
         :aria-valuemax="totalSteps"
@@ -229,11 +248,11 @@ async function createMatch() {
       <!-- Paso 1: formato -->
       <template v-if="currentStep === 1">
         <h2 id="step-title" class="font-display text-xl font-bold text-bb-text sm:text-2xl">
-          ¿Qué modalidad vais a jugar?
+          {{ t('matchSetup.format.title') }}
         </h2>
 
         <p class="mt-1 text-xs leading-5 text-bb-muted sm:text-sm">
-          Selecciona el formato del encuentro.
+          {{ t('matchSetup.format.description') }}
         </p>
 
         <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -250,16 +269,16 @@ async function createMatch() {
           >
             <span class="text-xl" aria-hidden="true">🏈</span>
             <span class="mt-2 block font-display text-base font-bold text-bb-text">
-              Partido normal
+              {{ t('matchSetup.format.normal.title') }}
             </span>
             <span class="mt-1 block text-xs leading-5 text-bb-muted sm:text-sm">
-              El formato estándar de Blood Bowl.
+              {{ t('matchSetup.format.normal.description') }}
             </span>
             <span
               v-if="format === 'normal'"
               class="mt-2 block text-xs font-semibold text-bb-blue sm:text-sm"
             >
-              Seleccionado
+              {{ t('matchSetup.selected') }}
             </span>
           </button>
 
@@ -275,15 +294,17 @@ async function createMatch() {
             @click="format = 'sevens'"
           >
             <span class="text-xl" aria-hidden="true">⚡</span>
-            <span class="mt-2 block font-display text-base font-bold text-bb-text"> Sevens </span>
+            <span class="mt-2 block font-display text-base font-bold text-bb-text">
+              {{ t('matchSetup.format.sevens.title') }}
+            </span>
             <span class="mt-1 block text-xs leading-5 text-bb-muted sm:text-sm">
-              La variante rápida de siete jugadores.
+              {{ t('matchSetup.format.sevens.description') }}
             </span>
             <span
               v-if="format === 'sevens'"
               class="mt-2 block text-xs font-semibold text-bb-blue sm:text-sm"
             >
-              Seleccionado
+              {{ t('matchSetup.selected') }}
             </span>
           </button>
         </div>
@@ -292,17 +313,17 @@ async function createMatch() {
       <!-- Paso 2: equipo local -->
       <template v-else-if="currentStep === 2">
         <h2 id="step-title" class="font-display text-xl font-bold text-bb-text sm:text-2xl">
-          Equipo local
+          {{ t('matchSetup.teams.home') }}
         </h2>
 
         <p class="mt-1 text-xs leading-5 text-bb-muted sm:text-sm">
-          Introduce los datos del primer equipo.
+          {{ t('matchSetup.teamDescription.home') }}
         </p>
 
         <div class="mt-4 space-y-3">
           <div>
             <label for="home-name" class="mb-1 block text-sm font-semibold text-bb-text">
-              Nombre del equipo
+              {{ t('matchSetup.teamName') }}
             </label>
             <input
               id="home-name"
@@ -310,22 +331,22 @@ async function createMatch() {
               type="text"
               maxlength="40"
               autocomplete="off"
-              placeholder="Ej. Reikland Reavers"
+              :placeholder="t('matchSetup.placeholders.homeName')"
               class="min-h-10 w-full rounded-lg border border-bb-border bg-bb-background px-3 py-2 text-sm text-bb-text placeholder:text-bb-muted focus:border-bb-blue focus:outline-none focus:ring-2 focus:ring-bb-blue/30"
             />
           </div>
 
           <div>
             <label for="home-race" class="mb-1 block text-sm font-semibold text-bb-text">
-              Raza
+              {{ t('matchSetup.race') }}
             </label>
             <select
               id="home-race"
               v-model="homeRace"
               class="min-h-10 w-full rounded-lg border border-bb-border bg-bb-background px-3 py-2 text-sm text-bb-text focus:border-bb-blue focus:outline-none focus:ring-2 focus:ring-bb-blue/30"
             >
-              <option v-for="race in races" :key="race" :value="race">
-                {{ race }}
+              <option v-for="race in races" :key="race.value" :value="race.value">
+                {{ t(`matchSetup.races.${race.key}`) }}
               </option>
             </select>
           </div>
@@ -333,7 +354,7 @@ async function createMatch() {
           <div>
             <div class="flex items-center justify-between gap-4">
               <label class="mb-1 block text-sm font-semibold text-bb-text">
-                Segundas oportunidades
+                {{ t('matchSetup.rerolls') }}
               </label>
 
               <output
@@ -349,7 +370,7 @@ async function createMatch() {
               min="0"
               max="6"
               step="1"
-              aria-label="Segundas oportunidades del equipo local"
+              :aria-label="t('matchSetup.rerollsForTeam', { team: t('matchSetup.teams.home') })"
               class="w-full cursor-pointer accent-bb-blue"
             />
 
@@ -364,17 +385,17 @@ async function createMatch() {
       <!-- Paso 3: equipo visitante -->
       <template v-else-if="currentStep === 3">
         <h2 id="step-title" class="font-display text-xl font-bold text-bb-text sm:text-2xl">
-          Equipo visitante
+          {{ t('matchSetup.teams.away') }}
         </h2>
 
         <p class="mt-1 text-xs leading-5 text-bb-muted sm:text-sm">
-          Introduce los datos del segundo equipo.
+          {{ t('matchSetup.teamDescription.away') }}
         </p>
 
         <div class="mt-4 space-y-3">
           <div>
             <label for="away-name" class="mb-1 block text-sm font-semibold text-bb-text">
-              Nombre del equipo
+              {{ t('matchSetup.teamName') }}
             </label>
             <input
               id="away-name"
@@ -382,22 +403,22 @@ async function createMatch() {
               type="text"
               maxlength="40"
               autocomplete="off"
-              placeholder="Ej. Gouged Eye"
+              :placeholder="t('matchSetup.placeholders.awayName')"
               class="min-h-10 w-full rounded-lg border border-bb-border bg-bb-background px-3 py-2 text-sm text-bb-text placeholder:text-bb-muted focus:border-bb-blue focus:outline-none focus:ring-2 focus:ring-bb-blue/30"
             />
           </div>
 
           <div>
             <label for="away-race" class="mb-1 block text-sm font-semibold text-bb-text">
-              Raza
+              {{ t('matchSetup.race') }}
             </label>
             <select
               id="away-race"
               v-model="awayRace"
               class="min-h-10 w-full rounded-lg border border-bb-border bg-bb-background px-3 py-2 text-sm text-bb-text focus:border-bb-blue focus:outline-none focus:ring-2 focus:ring-bb-blue/30"
             >
-              <option v-for="race in races" :key="race" :value="race">
-                {{ race }}
+              <option v-for="race in races" :key="race.value" :value="race.value">
+                {{ t(`matchSetup.races.${race.key}`) }}
               </option>
             </select>
           </div>
@@ -405,7 +426,7 @@ async function createMatch() {
           <div>
             <div class="flex items-center justify-between gap-4">
               <label class="mb-1 block text-sm font-semibold text-bb-text">
-                Segundas oportunidades
+                {{ t('matchSetup.rerolls') }}
               </label>
 
               <output
@@ -421,7 +442,7 @@ async function createMatch() {
               min="0"
               max="6"
               step="1"
-              aria-label="Segundas oportunidades del equipo visitante"
+              :aria-label="t('matchSetup.rerollsForTeam', { team: t('matchSetup.teams.away') })"
               class="w-full cursor-pointer accent-bb-red"
             />
 
@@ -436,11 +457,11 @@ async function createMatch() {
       <!-- Paso 4: selección del equipo pateador -->
       <template v-else-if="currentStep === 4">
         <h2 id="step-title" class="font-display text-xl font-bold text-bb-text sm:text-2xl">
-          ¿Quién patea primero?
+          {{ t('matchSetup.kickingTeam.title') }}
         </h2>
 
         <p class="mt-1 text-xs leading-5 text-bb-muted sm:text-sm">
-          Selecciona el equipo que realiza la patada inicial. Podéis elegirlo manualmente o al azar.
+          {{ t('matchSetup.kickingTeam.description') }}
         </p>
 
         <div class="mt-4 space-y-2">
@@ -456,25 +477,25 @@ async function createMatch() {
             @click="kickingTeamId = 'home'"
           >
             <span class="block text-xs font-semibold uppercase tracking-wide text-bb-muted">
-              Equipo local
+              {{ t('matchSetup.teams.home') }}
             </span>
             <span class="mt-1 block text-base font-bold text-bb-text">
-              {{ homeName.trim() || 'Equipo local' }}
+              {{ homeName.trim() || t('matchSetup.teams.home') }}
             </span>
             <span class="block text-xs text-bb-muted sm:text-sm">
-              {{ homeRace }}
+              {{ raceLabel(homeRace) }}
             </span>
             <span
               v-if="kickingTeamId === 'home'"
               class="mt-2 inline-block rounded-full bg-bb-blue px-3 py-1 text-xs font-semibold text-white sm:text-sm"
             >
-              Patea primero
+              {{ t('matchSetup.kickingTeam.kicksFirst') }}
             </span>
             <span
               v-else
               class="mt-2 inline-block rounded-full bg-bb-blue px-3 py-1 text-xs font-semibold text-white sm:text-sm"
             >
-              Receptor
+              {{ t('matchSetup.kickingTeam.receives') }}
             </span>
           </button>
 
@@ -490,25 +511,25 @@ async function createMatch() {
             @click="kickingTeamId = 'away'"
           >
             <span class="block text-xs font-semibold uppercase tracking-wide text-bb-muted">
-              Equipo visitante
+              {{ t('matchSetup.teams.away') }}
             </span>
             <span class="mt-1 block text-base font-bold text-bb-text">
-              {{ awayName.trim() || 'Equipo visitante' }}
+              {{ awayName.trim() || t('matchSetup.teams.away') }}
             </span>
             <span class="block text-xs text-bb-muted sm:text-sm">
-              {{ awayRace }}
+              {{ raceLabel(awayRace) }}
             </span>
             <span
               v-if="kickingTeamId === 'away'"
               class="mt-2 inline-block rounded-full bg-bb-red px-3 py-1 text-xs font-semibold text-white sm:text-sm"
             >
-              Patea primero
+              {{ t('matchSetup.kickingTeam.kicksFirst') }}
             </span>
             <span
               v-else
               class="mt-2 inline-block rounded-full bg-bb-red px-3 py-1 text-xs font-semibold text-white sm:text-sm"
             >
-              Receptor
+              {{ t('matchSetup.kickingTeam.receives') }}
             </span>
           </button>
 
@@ -517,17 +538,17 @@ async function createMatch() {
             class="min-h-10 w-full rounded-lg border border-bb-border px-3 py-2 text-sm font-semibold text-bb-text transition hover:bg-bb-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-blue"
             @click="chooseRandomKickingTeam"
           >
-            🎲 Elegir equipo pateador al azar
+            🎲 {{ t('matchSetup.kickingTeam.random') }}
           </button>
         </div>
 
         <p class="mt-3 text-xs text-bb-muted sm:text-sm">
-          Selección actual:
+          {{ t('matchSetup.kickingTeam.currentSelection') }}
           <strong class="text-bb-text">
             {{
               kickingTeamId === 'home'
-                ? homeName.trim() || 'Equipo local'
-                : awayName.trim() || 'Equipo visitante'
+                ? homeName.trim() || t('matchSetup.teams.home')
+                : awayName.trim() || t('matchSetup.teams.away')
             }}
           </strong>
         </p>
@@ -536,69 +557,77 @@ async function createMatch() {
       <!-- Paso 5: resumen y creación -->
       <template v-else>
         <h2 id="step-title" class="font-display text-xl font-bold text-bb-text sm:text-2xl">
-          Resumen del partido
+          {{ t('matchSetup.summary.title') }}
         </h2>
 
         <p class="mt-1 text-xs leading-5 text-bb-muted sm:text-sm">
-          Revisa la configuración antes de comenzar el partido.
+          {{ t('matchSetup.summary.description') }}
         </p>
 
         <div class="mt-4 rounded-xl border border-bb-border bg-bb-background p-3 sm:p-4">
           <dl class="space-y-3 text-sm">
             <div class="flex items-center justify-between gap-3">
-              <dt class="text-bb-muted">Formato</dt>
+              <dt class="text-bb-muted">{{ t('matchSetup.summary.format') }}</dt>
               <dd class="font-semibold text-bb-text">
-                {{ format === 'normal' ? 'Partido normal' : 'Sevens' }}
+                {{
+                  format === 'normal'
+                    ? t('matchSetup.format.normal.title')
+                    : t('matchSetup.format.sevens.title')
+                }}
               </dd>
             </div>
 
             <div class="border-t border-bb-border pt-3">
               <dt class="text-xs font-semibold uppercase tracking-wide text-bb-muted">
-                Equipo local
+                {{ t('matchSetup.teams.home') }}
               </dt>
               <dd class="mt-1 font-display text-base font-bold text-bb-blue">
                 {{ homeName.trim() }}
               </dd>
-              <dd class="text-xs text-bb-muted sm:text-sm">{{ homeRace }}</dd>
-              <dd class="mt-1 text-sm text-bb-text">{{ homeRerolls }} segundas oportunidades</dd>
+              <dd class="text-xs text-bb-muted sm:text-sm">{{ raceLabel(homeRace) }}</dd>
+              <dd class="mt-1 text-sm text-bb-text">
+                {{ t('matchSetup.summary.rerolls', { count: homeRerolls }) }}
+              </dd>
             </div>
 
             <div class="border-t border-bb-border pt-3">
               <dt class="text-xs font-semibold uppercase tracking-wide text-bb-muted">
-                Equipo visitante
+                {{ t('matchSetup.teams.away') }}
               </dt>
               <dd class="mt-1 font-display text-base font-bold text-bb-red">
                 {{ awayName.trim() }}
               </dd>
-              <dd class="text-xs text-bb-muted sm:text-sm">{{ awayRace }}</dd>
-              <dd class="mt-1 text-sm text-bb-text">{{ awayRerolls }} segundas oportunidades</dd>
+              <dd class="text-xs text-bb-muted sm:text-sm">{{ raceLabel(awayRace) }}</dd>
+              <dd class="mt-1 text-sm text-bb-text">
+                {{ t('matchSetup.summary.rerolls', { count: awayRerolls }) }}
+              </dd>
             </div>
 
             <div class="border-t border-bb-border pt-3">
               <dt class="text-xs font-semibold uppercase tracking-wide text-bb-muted">
-                Equipo que patea primero
+                {{ t('matchSetup.summary.kickingTeam') }}
               </dt>
               <dd class="mt-1 font-semibold text-bb-text">
                 {{ kickingTeamId === 'home' ? homeName.trim() : awayName.trim() }}
               </dd>
               <dd class="text-xs text-bb-muted sm:text-sm">
-                {{ kickingTeamId === 'home' ? homeRace : awayRace }}
+                {{ raceLabel(kickingTeamId === 'home' ? homeRace : awayRace) }}
               </dd>
             </div>
           </dl>
         </div>
 
         <p class="mt-3 text-xs leading-5 text-bb-muted sm:text-sm">
-          Si necesitas corregir algún dato, pulsa «Anterior» para volver al paso correspondiente.
+          {{ t('matchSetup.summary.editHint') }}
         </p>
       </template>
 
       <p
-        v-if="errorMessage || (currentStep === 5 && sessionError)"
+        v-if="errorMessage || (currentStep === 5 && sessionErrorText)"
         class="mt-3 rounded-lg border border-bb-red/30 bg-bb-red-soft p-2 text-sm font-medium text-bb-red"
         role="alert"
       >
-        {{ errorMessage || sessionError }}
+        {{ errorMessage || sessionErrorText }}
       </p>
 
       <footer class="mt-4 flex justify-between gap-3 border-t border-bb-border pt-3">
@@ -608,7 +637,7 @@ async function createMatch() {
           :disabled="currentStep === 1 || isCreating"
           @click="previousStep"
         >
-          Anterior
+          {{ t('matchSetup.navigation.previous') }}
         </button>
 
         <button
@@ -617,7 +646,7 @@ async function createMatch() {
           class="min-h-11 rounded-lg bg-bb-blue px-5 py-2 text-sm font-semibold text-white transition hover:bg-bb-blue-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-blue"
           @click="nextStep"
         >
-          Siguiente →
+          {{ t('matchSetup.navigation.next') }} →
         </button>
 
         <button
@@ -627,7 +656,9 @@ async function createMatch() {
           :disabled="isCreating"
           @click="createMatch"
         >
-          {{ isCreating ? 'Comenzar partido…' : 'Comenzar partido' }}
+          {{
+            isCreating ? t('matchSetup.navigation.creating') : t('matchSetup.navigation.startMatch')
+          }}
         </button>
       </footer>
     </section>
