@@ -1,1 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
+
+@theme {
+  --color-bb-blue: #10477d;
+  --color-bb-blue-deep: #0a3155;
+  --color-bb-blue-soft: #eaf1f8;
+
+  --color-bb-red: #b51920;
+  --color-bb-red-soft: #fbecee;
+
+  --color-bb-background: #f3f5f7;
+  --color-bb-surface: #ffffff;
+  --color-bb-text: #202833;
+  --color-bb-muted: #5b6573;
+  --color-bb-border: #d7dde5;
+
+  --color-bb-gold: #d6a13a;
+  --color-bb-gold-deep: #8c5a12;
+  --color-bb-gold-soft: #f7e7bf;
+  --color-bb-gold-pale: #fff4dc;
+  --color-bb-gold-border: #e7c98b;
+
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  font-family: var(--font-sans);
+  color: var(--color-bb-text);
+  background: var(--color-bb-background);
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.score-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.card-scene {
+  perspective: 1200px;
+}
+
+.card-flipper {
+  position: relative;
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 350ms ease-in-out;
+}
+
+.card-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  grid-area: 1 / 1;
+  min-width: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+.card-gesture-area {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flipper {
+    transition-duration: 0.01ms;
+  }
+}
