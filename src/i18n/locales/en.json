@@ -1,6 +1,6 @@
 {
   "app": {
-    "tagline": "Made for the game",
+    "tagline": "A Blood Bowl app",
     "language": "Select language",
     "logoLabel": "BB Chief, go to setup"
   },
@@ -156,18 +156,39 @@
       "awayName": "Enter the away team name.",
       "rerolls": "The {team} rerolls must be an integer between 0 and 20."
     },
+    "matchType": {
+      "title": "What type of match are you playing?",
+      "exhibition": {
+        "title": "Exhibition",
+        "description": "A friendly match outside a competition."
+      },
+      "leagueTournament": {
+        "title": "League / Tournament",
+        "description": "A match that is part of a competition."
+      }
+    },
+    "advantage": {
+      "title": "Which team has the higher team value?",
+      "description": "Select the team with the higher team value.",
+      "none": "Equal team value"
+    },
     "kickingTeam": {
       "title": "Who kicks first?",
-      "description": "Select the team taking the opening kick. You can choose manually or at random.",
+      "description": "Pick who kicks, or leave it to chance.",
       "kicksFirst": "Kicks first",
+      "kicksFirstShort": "K",
       "receives": "Receiving team",
-      "random": "Choose kicking team at random",
-      "currentSelection": "Current selection:"
+      "receivesShort": "R",
+      "random": "Choose at random",
+      "pending": "Draw pending",
+      "currentSelection": "Kicking team:"
     },
     "summary": {
       "title": "Match summary",
       "description": "Review the setup before starting the match.",
+      "matchType": "Match type",
       "format": "Format",
+      "advantage": "Team value advantage",
       "rerolls": "Rerolls: {count}",
       "kickingTeam": "Team kicking first",
       "editHint": "To change any details, press “Previous” to return to the relevant step."

@@ -1,6 +1,6 @@
 {
   "app": {
-    "tagline": "Hecho para jugar",
+    "tagline": "A Blood Bowl app",
     "language": "Seleccionar idioma",
     "logoLabel": "BB Chief, ir a configuración"
   },
@@ -156,18 +156,39 @@
       "awayName": "Introduce el nombre del equipo visitante.",
       "rerolls": "Las segundas oportunidades del {team} deben ser un número entero entre 0 y 20."
     },
+    "matchType": {
+      "title": "¿Qué tipo de partido vais a jugar?",
+      "exhibition": {
+        "title": "Exhibición",
+        "description": "Un partido amistoso sin competición."
+      },
+      "leagueTournament": {
+        "title": "Liga / Torneo",
+        "description": "Un partido perteneciente a una competición."
+      }
+    },
+    "advantage": {
+      "title": "¿Qué equipo tiene ventaja de valoración?",
+      "description": "Selecciona el equipo con mayor valoración.",
+      "none": "Valoración igualada"
+    },
     "kickingTeam": {
       "title": "¿Quién patea primero?",
-      "description": "Selecciona el equipo que realiza la patada inicial. Podéis elegirlo manualmente o al azar.",
+      "description": "Elige quién patea o se sorteará al azar.",
       "kicksFirst": "Patea primero",
-      "receives": "Receptor",
-      "random": "Elegir equipo pateador al azar",
-      "currentSelection": "Selección actual:"
+      "kicksFirstShort": "P",
+      "receives": "Recibe",
+      "receivesShort": "R",
+      "random": "Elegir al azar",
+      "pending": "Pendiente de sorteo",
+      "currentSelection": "Equipo que patea:"
     },
     "summary": {
       "title": "Resumen del partido",
       "description": "Revisa la configuración antes de comenzar el partido.",
-      "format": "Formato",
+      "matchType": "Tipo de partido",
+      "format": "Modalidad",
+      "advantage": "Ventaja de valoración",
       "rerolls": "Segundas oportunidades: {count}",
       "kickingTeam": "Equipo que patea primero",
       "editHint": "Si necesitas corregir algún dato, pulsa «Anterior» para volver al paso correspondiente."

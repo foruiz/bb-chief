@@ -38,10 +38,10 @@ function toggleCardFace() {
 </script>
 
 <template>
-  <main class="match-main mx-auto h-full min-h-0 max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
-    <section v-if="currentMatch" class="match-layout space-y-5">
+  <main class="match-main mx-auto h-full min-h-0 max-w-6xl px-4 sm:px-6">
+    <section v-if="currentMatch" class="match-layout">
       <!-- Columna izquierda: parte y marcador -->
-      <div class="match-overview space-y-5">
+      <div class="match-overview flex flex-col">
         <!-- Parte -->
         <div
           class="match-half relative overflow-hidden rounded-xl border border-bb-border bg-bb-surface px-3 py-2 text-center shadow-sm"
@@ -508,6 +508,34 @@ function toggleCardFace() {
 </template>
 
 <style scoped>
+/* =========================================================
+   SISTEMA UNIFICADO DE ESPACIADO
+   ========================================================= */
+
+.match-main {
+  --match-gap: 1.25rem;
+
+  padding-top: var(--match-gap);
+  padding-bottom: var(--match-gap);
+}
+
+.match-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--match-gap);
+}
+
+.match-overview {
+  gap: var(--match-gap);
+}
+
+/* Pantallas mayores */
+@media (min-width: 640px) {
+  .match-main {
+    --match-gap: 2rem;
+  }
+}
+
 .card-scene {
   perspective: 1200px;
 }
@@ -540,40 +568,322 @@ function toggleCardFace() {
   }
 }
 
-@media (orientation: landscape) and (max-width: 950px) and (max-height: 600px) {
+/* =========================================================
+   MÓVIL VERTICAL COMPACTO
+   ========================================================= */
+
+@media (orientation: portrait) and (max-width: 767px) and (max-height: 760px) {
   .match-main {
+    --match-gap: 0.75rem;
+
     width: 100%;
     max-width: none;
-    padding: 0.5rem 0.75rem;
+    height: auto;
+    min-height: 100%;
+    padding: var(--match-gap) 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .match-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--match-gap);
+    min-height: 100%;
+  }
+
+  .match-layout > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0;
+  }
+
+  /* Parte y marcador */
+
+  .match-overview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--match-gap);
+    min-width: 0;
+  }
+
+  .match-half {
+    flex: 0 0 auto;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .match-half p {
+    font-size: 0.6rem;
+    line-height: 0.8rem;
+  }
+
+  .match-half h2 {
+    margin-top: 0.1rem;
+    font-size: 1.1rem;
+    line-height: 1.35rem;
+  }
+
+  .match-scoreboard {
+    gap: 0.5rem;
+  }
+
+  .match-team {
+    min-width: 0;
+    border-radius: 0.85rem;
+  }
+
+  .match-team > div:first-child {
+    height: 0.25rem;
+  }
+
+  .match-team-content {
+    padding: 0.45rem 0.35rem;
+  }
+
+  .match-team-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.55rem;
+  }
+
+  .match-team-icon span {
+    font-size: 1.25rem;
+  }
+
+  .match-team-name {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1rem;
+  }
+
+  .match-team-score {
+    margin-top: 0.15rem;
+    font-size: 3.25rem;
+    line-height: 1;
+  }
+
+  .match-team-label {
+    margin-top: 0.15rem;
+    font-size: 0.6rem;
+    line-height: 0.8rem;
+  }
+
+  /* Tarjeta de acciones */
+
+  .match-panel {
+    display: flex;
+    min-width: 0;
+  }
+
+  .card-flipper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .card-face {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .match-card-content {
+    flex: 1;
+    min-width: 0;
+    padding: 0.65rem;
+  }
+
+  .match-active-icon,
+  .match-flip-button {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.65rem;
+  }
+
+  .match-active-icon {
+    font-size: 1.5rem;
+  }
+
+  .match-flip-button img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .match-active-name {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+  }
+
+  .match-card-content > div:first-child p {
+    line-height: 1rem;
+  }
+
+  .match-card-content > div:first-child p:first-child {
+    font-size: 0.65rem;
+  }
+
+  .match-card-content > div:first-child p:last-child {
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+  }
+
+  /* Acciones principales */
+
+  .match-actions {
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+  }
+
+  .match-action {
+    min-height: 4.25rem;
+    gap: 0.25rem;
+    padding: 0.4rem 0.25rem;
+  }
+
+  .match-action > span:first-child {
+    font-size: 1.5rem;
+    line-height: 1.75rem;
+  }
+
+  .match-action > span:last-child {
+    font-size: 0.75rem;
+    line-height: 0.9rem;
+    text-align: center;
+  }
+
+  .match-action .score-number {
+    font-size: 1.75rem;
+    line-height: 1.8rem;
+  }
+
+  /* Finalizar turno */
+
+  .match-end-turn {
+    min-height: 0;
+    margin-top: 0.65rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 1.35rem;
+    line-height: 1.6rem;
+  }
+
+  .match-end-turn > div {
+    margin-top: 0.3rem;
+  }
+
+  .match-end-hint {
+    margin-top: 0.3rem;
+    font-size: 0.65rem;
+    line-height: 0.85rem;
+  }
+
+  /* Descanso */
+
+  .match-secondary-action {
+    min-height: 2.75rem;
+    margin-top: 0.65rem;
+    padding: 0.55rem;
+  }
+
+  /* Resultado final */
+
+  .match-result {
+    margin-top: 0.75rem;
+  }
+
+  .match-result .score-number {
+    font-size: 2.75rem;
+  }
+
+  .match-result > p {
+    margin-top: 0.65rem;
+    font-size: 0.9rem;
+  }
+
+  /* Cara posterior: opciones */
+
+  .card-back .match-card-content {
+    min-height: 0;
+  }
+
+  .card-back h3 {
+    font-size: 1.4rem;
+    line-height: 1.75rem;
+  }
+
+  .match-option-grid {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .match-option-grid button {
+    min-width: 0;
+    gap: 0.3rem;
+    padding: 0.35rem 0.2rem;
+  }
+
+  .match-option-grid button span:first-child {
+    font-size: 1.65rem;
+    line-height: 1.9rem;
+  }
+
+  .match-option-grid button span:last-child {
+    font-size: 0.7rem;
+    line-height: 0.85rem;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .card-back .match-card-content > p {
+    padding-top: 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  /* Errores */
+
+  .match-error {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* =========================================================
+   MÓVIL HORIZONTAL
+   ========================================================= */
+
+@media (orientation: landscape) and (max-width: 950px) and (max-height: 600px) {
+  .match-main {
+    --match-gap: 0.75rem;
+
+    width: 100%;
+    max-width: none;
+    padding: var(--match-gap) 0.75rem;
   }
 
   .match-layout {
     display: grid;
     grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
     grid-template-rows: minmax(0, 1fr) auto;
-    gap: 0.75rem;
+    gap: var(--match-gap);
     height: 100%;
     min-height: 0;
   }
 
-  /* Evita márgenes heredados de space-y-5 en el Grid principal. */
   .match-layout > :not([hidden]) ~ :not([hidden]) {
     margin-top: 0;
   }
 
   /* Columna izquierda */
+
   .match-overview {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: var(--match-gap);
     min-width: 0;
     min-height: 0;
     height: 100%;
   }
 
-  /* Elimina también space-y-5 entre el panel de parte y el marcador. */
-  .match-overview > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 0;
+  .match-scoreboard {
+    flex: 1;
+    min-height: 0;
+    gap: 0.5rem;
   }
 
   .match-half {
@@ -584,12 +894,6 @@ function toggleCardFace() {
   .match-half h2 {
     font-size: 1.1rem;
     line-height: 1.25rem;
-  }
-
-  .match-scoreboard {
-    flex: 1;
-    min-height: 0;
-    gap: 0.5rem;
   }
 
   .match-team {
@@ -637,19 +941,12 @@ function toggleCardFace() {
   }
 
   /* Columna derecha */
+
   .match-panel {
     display: flex;
     min-width: 0;
     min-height: 0;
     height: 100%;
-  }
-
-  .match-panel .card-scene {
-    display: flex;
-    flex: 1;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
   }
 
   .card-flipper {
@@ -743,6 +1040,7 @@ function toggleCardFace() {
   }
 
   /* Cara posterior */
+
   .card-back .match-card-content {
     min-height: 0;
   }
@@ -777,6 +1075,7 @@ function toggleCardFace() {
   }
 
   /* Resultado final */
+
   .match-result {
     margin-top: 0.65rem;
   }
@@ -791,6 +1090,7 @@ function toggleCardFace() {
   }
 
   /* Avisos */
+
   .match-error {
     grid-column: 1 / -1;
     padding: 0.4rem 0.65rem;
