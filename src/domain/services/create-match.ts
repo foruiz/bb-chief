@@ -1,16 +1,17 @@
 import type { CreateMatchInput, MatchState, Team, TeamId } from '../models/match'
+import { DomainError } from '../errors/domain-error'
 
 function createTeam(id: TeamId, name: string, race: string, rerolls: number): Team {
   if (!name.trim()) {
-    throw new Error('El nombre del equipo es obligatorio')
+    throw new DomainError('TEAM_NAME_REQUIRED')
   }
 
   if (!race.trim()) {
-    throw new Error('La raza del equipo es obligatoria')
+    throw new DomainError('TEAM_RACE_REQUIRED')
   }
 
   if (!Number.isInteger(rerolls) || rerolls < 0) {
-    throw new Error('Las segundas oportunidades deben ser un entero no negativo')
+    throw new DomainError('INVALID_REROLLS')
   }
 
   return {

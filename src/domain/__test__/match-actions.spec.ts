@@ -146,7 +146,9 @@ describe('Operaciones de partido', () => {
     const inactiveTeamId = session.current.activeTeamId === 'home' ? 'away' : 'home'
 
     expect(() => recordTouchdown(session, inactiveTeamId)).toThrow(
-      'Solo el equipo activo puede anotar un touchdown',
+      expect.objectContaining({
+        code: 'TOUCHDOWN_NOT_ACTIVE_TEAM',
+      }),
     )
   })
 

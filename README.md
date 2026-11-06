@@ -1,96 +1,160 @@
 # BB Chief
 
-Aplicación web para llevar el seguimiento de un partido de **Blood Bowl 2020** desde un único móvil o tableta compartido por ambos jugadores.
+BB Chief is a lightweight web application for tracking Blood Bowl 2020 matches.
 
-BB Chief está pensada para que los jugadores puedan consultar y actualizar el marcador, los turnos y las segundas oportunidades sin tener que llevar esas cuentas manualmente.
+It is designed to be used by both players on a shared mobile device or tablet, making it easy to keep track of the match without interrupting gameplay.
 
-> **Estado del proyecto:** en desarrollo. Algunas funcionalidades o detalles de interfaz pueden cambiar durante la implementación del MVP.
+## Project Status
 
-## Funcionalidades previstas
+BB Chief is currently under development.
 
-- Configuración de un partido normal o de la variante **Sevens**.
-- Registro del nombre y tipo de equipo de cada participante.
-- Configuración de las segundas oportunidades disponibles para cada equipo.
-- Selección del equipo pateador.
-- Marcador de touchdowns por equipo.
-- Contadores de segundas oportunidades disponibles, con descuento al utilizarlas.
-- Seguimiento de la parte y los turnos de ambos equipos.
-- Alternancia de equipo activo al finalizar un turno.
-- Detección del descanso y confirmación antes de pasar a la segunda parte.
-- Detección del final del partido.
-- Corrección manual de touchdowns y segundas oportunidades.
-- Deshacer la última acción.
-- Interfaz responsive para móvil y tableta, tanto en orientación vertical como horizontal.
-- Persistencia local en el dispositivo, sin necesidad de una cuenta de usuario ni de un servidor para guardar la partida.
+The core match management functionality and unit tests have been implemented. The application is still subject to improvements, particularly in its user interface and overall user experience.
 
-## Tecnologías
+## Features
+
+- Match setup for standard Blood Bowl and Sevens formats.
+- Team configuration, including team names, races, and initial rerolls.
+- Selection of the kicking team.
+- Touchdown tracking.
+- Turn management and automatic alternation between teams.
+- Half-time and end-of-match management.
+- Reroll tracking and manual corrections.
+- Undo of the last action.
+- Responsive interface for mobile devices and tablets.
+- Local match persistence using browser storage.
+- Saved match recovery when reopening the application.
+
+## Technologies
+
+The project is built using:
 
 - [Vue 3](https://vuejs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vite.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- Pruebas unitarias para la lógica de dominio.
+- [Vitest](https://vitest.dev/) for unit testing.
+- [Playwright](https://playwright.dev/) for end-to-end testing.
 
-## Requisitos previos
+## Requirements
 
-- Node.js y npm. Utiliza una versión de Node.js compatible con las dependencias del proyecto.
-- Git, si vas a clonar el repositorio.
+To run the project locally, you need:
 
-## Instalación y ejecución
+- [Node.js](https://nodejs.org/) (LTS version recommended).
+- npm.
+- Git.
 
-Clona el repositorio y entra en la carpeta del proyecto:
+## Installation
+
+Clone the repository:
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/YOUR-USERNAME/bb-chief.git
+```
+
+Navigate to the project directory:
+
+```bash
 cd bb-chief
 ```
 
-Instala las dependencias:
+Install the dependencies:
 
 ```bash
 npm install
 ```
 
-Inicia el servidor de desarrollo:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Vite mostrará la dirección local en la que se sirve la aplicación. Para probarla en un móvil conectado a la misma red, puede ser necesario iniciar Vite escuchando en la red local (por ejemplo, con `npm run dev -- --host 0.0.0.0`) y acceder desde el navegador del móvil a la dirección IP del equipo de desarrollo. No expongas el servidor de desarrollo a redes no confiables.
+By default, Vite makes the development server available on your local machine.
 
-## Pruebas y compilación
-
-Ejecuta las pruebas unitarias:
+To access it from another device on the same local network, run:
 
 ```bash
-npm test
+npm run dev -- --host 0.0.0.0
 ```
 
-Genera la compilación de producción:
+Then open the URL displayed by Vite in your mobile device or tablet.
 
-```bash
-npm run build
-```
+**Security note:** Only expose the development server to trusted local networks. Do not make it publicly accessible.
 
-Los comandos disponibles dependen de los scripts definidos en `package.json`. Consulta ese archivo si alguno de los comandos anteriores no está configurado en tu versión del proyecto.
+## Available Commands
 
-## Uso y datos
+| Command              | Description                                         |
+| -------------------- | --------------------------------------------------- |
+| `npm run dev`        | Starts the development server.                      |
+| `npm run test:unit`  | Runs the unit tests.                                |
+| `npm run test:e2e`   | Runs the end-to-end tests.                          |
+| `npm run type-check` | Runs TypeScript type checking.                      |
+| `npm run build`      | Checks types and builds the production application. |
 
-BB Chief está diseñada para utilizarse en un único dispositivo compartido por los dos jugadores. La persistencia local evita depender de una conexión a un servicio remoto, pero **no equivale a una copia de seguridad**: los datos del navegador pueden perderse si se borran sus datos, se cambia de navegador o se cambia de dispositivo.
+## Match Data and Persistence
 
-## Alcance y reglas
+BB Chief stores match data locally in the browser using local storage.
 
-El proyecto toma como referencia Blood Bowl 2020 y contempla partidos normales y la variante Sevens. BB Chief es una herramienta de seguimiento del partido; no pretende sustituir el reglamento oficial. Ante cualquier discrepancia, prevalece el reglamento aplicable a la partida.
+This means:
 
-Blood Bowl es una marca de sus respectivos titulares. Este proyecto es independiente y no está afiliado, patrocinado ni respaldado por Games Workshop.
+- Match data remains available on the same device and browser.
+- No user account or remote server is required.
+- Match data is not automatically synchronized between devices.
+- Clearing browser data or local storage may permanently delete saved matches.
 
-## Contribuciones
+**Important:** There is currently no automatic backup or cloud synchronization. If you change devices or clear your browser data, your saved matches may be lost.
 
-Por ahora, el proyecto está en desarrollo. Si deseas proponer cambios, abre una incidencia describiendo el problema o la mejora, incluyendo los pasos para reproducirlo cuando corresponda.
+## Ruleset
 
-## Licencia
+BB Chief is designed around the Blood Bowl 2020 ruleset, including the Sevens format.
 
-Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo [`LICENSE`](LICENSE) para ver el texto completo.
+The application is intended as a match-tracking tool. It does not replace the official rulebook, calculate every game situation, or enforce all tabletop rules.
 
-Antes de publicar el repositorio, añade el archivo `LICENSE` con el texto oficial de MIT y sustituye el titular del copyright por el nombre o alias que quieras utilizar.
+Players remain responsible for applying the official rules correctly.
+
+## Disclaimer
+
+BB Chief is an independent, fan-made project.
+
+Blood Bowl and all related names, logos, artwork, and intellectual property are the property of Games Workshop Limited.
+
+This project is not affiliated with, endorsed by, or sponsored by Games Workshop Limited.
+
+## Contributions
+
+BB Chief is currently maintained exclusively by its original author.
+
+External code contributions and pull requests are not accepted at this time.
+
+If you find a bug or have an idea for improvement, you are welcome to open an issue describing the problem or suggestion.
+
+Please include steps to reproduce the issue whenever possible.
+
+All decisions regarding the official repository and its development remain under the control of the project maintainer.
+
+## Attribution
+
+BB Chief is an independent open-source project.
+
+If you fork, clone, or redistribute this project, I kindly ask you to:
+
+- Preserve the original copyright and license notices.
+- Acknowledge the original BB Chief project and its author.
+- Include a link to the original repository whenever reasonably possible.
+- Clearly identify any modifications made to the original project.
+
+Original repository: https://github.com/YOUR-USERNAME/bb-chief
+
+These attribution requests do not impose additional restrictions on the rights granted by the GPL-3.0 license.
+
+## License
+
+BB Chief is licensed under the **GNU General Public License v3.0 (GPL-3.0-only)**.
+
+You may use, study, modify, and redistribute this software under the terms and conditions of the GPL-3.0 license.
+
+Copyright (C) 2026 YOUR-NAME
+
+See the [`LICENSE`](LICENSE) file for the complete license text.
+
+The original copyright notices and license notices must be preserved when redistributing the project, as required by the license.

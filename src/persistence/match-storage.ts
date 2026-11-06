@@ -10,7 +10,10 @@ export interface StorageLike {
 }
 
 export type LoadSessionResult =
-  { status: 'empty' } | { status: 'valid'; session: MatchSession } | { status: 'invalid' }
+  | { status: 'empty' }
+  | { status: 'valid'; session: MatchSession }
+  | { status: 'invalid' }
+  | { status: 'unavailable' }
 
 interface StoredSession {
   version: number
@@ -82,7 +85,7 @@ export function loadSession(storage: StorageLike = localStorage): LoadSessionRes
   try {
     raw = storage.getItem(STORAGE_KEY)
   } catch {
-    return { status: 'invalid' }
+    return { status: 'unavailable' }
   }
 
   if (raw === null) return { status: 'empty' }
