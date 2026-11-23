@@ -1,5 +1,6 @@
 import type { MatchSession, MatchState, TeamId, Team } from '../models/match'
 import { getTurnsPerHalf } from '../rules/match-rules'
+import { DomainError } from '../errors/domain-error'
 
 const MAX_HISTORY = 100
 
@@ -19,7 +20,7 @@ function saveState(session: MatchSession, next: MatchState): MatchSession {
 
 function requireActiveMatch(match: MatchState): void {
   if (match.status !== 'in-progress') {
-    throw new Error('La partida no admite esta acción en su estado actual')
+    throw new DomainError('MATCH_NOT_ACTIVE')
   }
 }
 
@@ -47,7 +48,7 @@ function completeActiveTurn(match: MatchState): MatchState {
   const activeTeam = getTeam(match, activeId)
 
   if (activeTeam.turnsCompleted >= maxTurns) {
-    throw new Error('El equipo ya ha completado todos sus turnos de esta parte')
+    throw new DomainError('TEAM_TURNS_COMPLETED')
   }
 
   const updated = updateTeam(match, activeId, {
@@ -75,9 +76,12 @@ function completeActiveTurn(match: MatchState): MatchState {
   }
 }
 
-function requireNonNegativeInteger(value: number, label: string): void {
+function requireNonNegativeInteger(
+  value: number,
+  errorCode: 'INVALID_TOUCHDOWNS' | 'INVALID_REROLLS',
+): void {
   if (!Number.isInteger(value) || value < 0) {
-    throw new Error(`${label} debe ser un entero no negativo`)
+    throw new DomainError(errorCode)
   }
 }
 
@@ -86,7 +90,7 @@ export function recordTouchdown(session: MatchSession, teamId: TeamId): MatchSes
   requireActiveMatch(match)
 
   if (match.activeTeamId !== teamId) {
-    throw new Error('Solo el equipo activo puede anotar un touchdown')
+    throw new DomainError('TOUCHDOWN_NOT_ACTIVE_TEAM')
   }
 
   const team = getTeam(match, teamId)
@@ -104,7 +108,7 @@ export function correctTouchdowns(
   touchdowns: number,
 ): MatchSession {
   requireActiveMatch(session.current)
-  requireNonNegativeInteger(touchdowns, 'Los touchdowns')
+  requireNonNegativeInteger(touchdowns, 'INVALID_TOUCHDOWNS')
 
   if (getTeam(session.current, teamId).touchdowns === touchdowns) {
     return session
@@ -119,7 +123,7 @@ export function useReroll(session: MatchSession, teamId: TeamId): MatchSession {
   const team = getTeam(session.current, teamId)
 
   if (team.rerollsAvailable <= 0) {
-    throw new Error('El equipo no tiene segundas oportunidades disponibles')
+    throw new DomainError('NO_REROLLS_AVAILABLE')
   }
 
   return saveState(
@@ -136,7 +140,7 @@ export function correctRerolls(
   rerollsAvailable: number,
 ): MatchSession {
   requireActiveMatch(session.current)
-  requireNonNegativeInteger(rerollsAvailable, 'Las segundas oportunidades')
+  requireNonNegativeInteger(rerollsAvailable, 'INVALID_REROLLS')
 
   if (getTeam(session.current, teamId).rerollsAvailable === rerollsAvailable) {
     return session
@@ -157,7 +161,7 @@ export function confirmHalftime(session: MatchSession): MatchSession {
   const match = session.current
 
   if (match.status !== 'halftime-pending' || match.half !== 1) {
-    throw new Error('No hay un descanso pendiente de confirmar')
+    throw new DomainError('HALFTIME_NOT_PENDING')
   }
 
   return saveState(session, {

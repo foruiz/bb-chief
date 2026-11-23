@@ -1,0 +1,186 @@
+{
+  "app": {
+    "tagline": "Made for the game",
+    "language": "Select language",
+    "logoLabel": "BB Chief, go to setup"
+  },
+  "recovery": {
+    "title": "Saved match",
+    "description": "A previous match was found. Would you like to continue it or start a new one?",
+    "continue": "Continue match",
+    "discard": "Discard and start a new match"
+  },
+  "match": {
+    "confirmNew": {
+      "title": "Start a new match?",
+      "description": "The current match is not finished. If you continue, you will lose its scoreboard, turns and action history.",
+      "confirm": "Discard and start new match",
+      "cancel": "Continue current match"
+    }
+  },
+  "storage": {
+    "saveError": "The match could not be saved. Check your browser storage.",
+    "readError": "The saved match could not be read. You can start a new one.",
+    "unavailable": "Local storage is not available in this browser.",
+    "deleteError": "The saved match could not be deleted. Check your browser storage."
+  },
+  "errors": {
+    "TEAM_NAME_REQUIRED": "Team name is required.",
+    "TEAM_RACE_REQUIRED": "Team race is required.",
+    "INVALID_REROLLS": "Rerolls must be a non-negative integer.",
+    "MATCH_NOT_ACTIVE": "This action is not allowed in the current match state.",
+    "TEAM_TURNS_COMPLETED": "The team has completed all its turns for this half.",
+    "TOUCHDOWN_NOT_ACTIVE_TEAM": "Only the active team can score a touchdown.",
+    "NO_REROLLS_AVAILABLE": "The team has no rerolls available.",
+    "HALFTIME_NOT_PENDING": "There is no halftime waiting for confirmation.",
+    "INVALID_TOUCHDOWNS": "Touchdowns must be a non-negative integer.",
+    "UNKNOWN_ERROR": "An unexpected error occurred."
+  },
+  "matchView": {
+    "status": {
+      "finished": "Match finished",
+      "halftime": "Halftime",
+      "firstHalf": "First half",
+      "secondHalf": "Second half"
+    },
+    "score": {
+      "touchdowns": "Touchdowns",
+      "home": "Home",
+      "away": "Away",
+      "draw": "It's a tie!",
+      "victory": "{team} wins!"
+    },
+    "active": {
+      "turn": "Active turn",
+      "scoreTouchdown": "Score touchdown",
+      "useReroll": "Use reroll",
+      "finishTurn": "End turn {turn}",
+      "endTurnHint": "The turn will pass to the appropriate team."
+    },
+    "halftime": {
+      "completed": "First half completed",
+      "title": "Halftime!",
+      "description": "Both teams have completed their turns in the first half. Confirm to start the second half.",
+      "start": "Start second half"
+    },
+    "finished": {
+      "title": "Final result"
+    },
+    "options": {
+      "title": "Match options",
+      "show": "Show match options",
+      "backToScore": "Back to scoreboard",
+      "help": "Help",
+      "helpComingSoon": "Help (coming soon)",
+      "comingSoon": "Coming soon",
+      "undo": "Undo last action",
+      "exit": "Exit",
+      "exitHint": "Exiting will ask for confirmation if the match is still in progress."
+    },
+    "accessibility": {
+      "teamCard": "{team}'s card",
+      "halftimeCard": "Halftime card",
+      "finishedCard": "Finished match card"
+    }
+  },
+  "matchSetup": {
+    "title": "Match setup",
+    "subtitle": "Set up the match before taking to the pitch.",
+    "step": "Step {current} of {total}",
+    "progress": "Setup progress",
+    "steps": {
+      "format": "Format",
+      "home": "Home team",
+      "away": "Away team",
+      "kickingTeam": "Kicking team",
+      "summary": "Summary"
+    },
+    "format": {
+      "title": "Which format are you playing?",
+      "description": "Select the match format.",
+      "normal": {
+        "title": "Standard match",
+        "description": "The standard Blood Bowl format."
+      },
+      "sevens": {
+        "title": "Sevens",
+        "description": "The fast-paced seven-a-side variant."
+      }
+    },
+    "selected": "Selected",
+    "teams": {
+      "home": "Home team",
+      "away": "Away team"
+    },
+    "teamDescription": {
+      "home": "Enter the details of the first team.",
+      "away": "Enter the details of the second team."
+    },
+    "teamName": "Team name",
+    "race": "Race",
+    "rerolls": "Rerolls",
+    "rerollsForTeam": "{team} rerolls",
+    "placeholders": {
+      "homeName": "E.g. Reikland Reavers",
+      "awayName": "E.g. Gouged Eye"
+    },
+    "races": {
+      "amazons": "Amazon",
+      "highElves": "High Elves",
+      "oldWorldAlliance": "Old World Alliance",
+      "chaos": "Chaos",
+      "dwarfs": "Dwarfs",
+      "darkElves": "Dark Elves",
+      "woodElves": "Wood Elves",
+      "chaosChosen": "Chaos Chosen",
+      "chaosDwarfs": "Chaos Dwarfs",
+      "humans": "Humans",
+      "imperialNobility": "Imperial Nobility",
+      "lizardmen": "Lizardmen",
+      "khorne": "Khorne",
+      "undead": "Undead",
+      "norse": "Norse",
+      "nurgle": "Nurgle",
+      "ogre": "Ogre",
+      "orcs": "Orcs",
+      "chaosRenegades": "Chaos Renegades",
+      "skaven": "Skaven",
+      "snotlings": "Snotlings",
+      "vampires": "Vampires",
+      "elvenUnion": "Elven Union",
+      "underworldDenizens": "Underworld Denizens",
+      "other": "Other"
+    },
+    "validation": {
+      "homeName": "Enter the home team name.",
+      "awayName": "Enter the away team name.",
+      "rerolls": "The {team} rerolls must be an integer between 0 and 20."
+    },
+    "kickingTeam": {
+      "title": "Who kicks first?",
+      "description": "Select the team taking the opening kick. You can choose manually or at random.",
+      "kicksFirst": "Kicks first",
+      "receives": "Receiving team",
+      "random": "Choose kicking team at random",
+      "currentSelection": "Current selection:"
+    },
+    "summary": {
+      "title": "Match summary",
+      "description": "Review the setup before starting the match.",
+      "format": "Format",
+      "rerolls": "Rerolls: {count}",
+      "kickingTeam": "Team kicking first",
+      "editHint": "To change any details, press “Previous” to return to the relevant step."
+    },
+    "errors": {
+      "create": "The match could not be created.",
+      "openScoreboard": "The scoreboard could not be opened. Check navigation and try again."
+    },
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "creating": "Starting match…",
+      "startMatch": "Start match"
+    }
+  }
+}
