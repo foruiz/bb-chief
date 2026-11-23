@@ -3,7 +3,9 @@ import { createMatch } from '../services/create-match'
 import type { CreateMatchInput } from '../models/match'
 
 const validInput: CreateMatchInput = {
+  matchType: 'exhibition',
   format: 'normal',
+  advantageTeamId: null,
   kickingTeamId: 'home',
   home: {
     name: 'Orcos',

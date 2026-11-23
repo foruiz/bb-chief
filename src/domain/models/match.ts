@@ -1,9 +1,7 @@
 export type TeamId = 'home' | 'away'
-
 export type MatchFormat = 'normal' | 'sevens'
-
+export type MatchType = 'exhibition' | 'league-tournament'
 export type MatchHalf = 1 | 2
-
 export type MatchStatus = 'in-progress' | 'halftime-pending' | 'finished'
 
 export interface Team {
@@ -17,7 +15,9 @@ export interface Team {
 }
 
 export interface MatchState {
+  matchType: MatchType
   format: MatchFormat
+  advantageTeamId: TeamId | null
   half: MatchHalf
   status: MatchStatus
   kickingTeamId: TeamId
@@ -26,7 +26,9 @@ export interface MatchState {
 }
 
 export interface CreateMatchInput {
+  matchType: MatchType
   format: MatchFormat
+  advantageTeamId: TeamId | null
   kickingTeamId: TeamId
   home: {
     name: string
@@ -40,10 +42,6 @@ export interface CreateMatchInput {
   }
 }
 
-/**
- * Sesión de trabajo de una partida.
- * history contiene los estados anteriores, del más antiguo al más reciente.
- */
 export interface MatchSession {
   current: MatchState
   history: MatchState[]

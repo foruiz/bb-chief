@@ -1,10 +1,11 @@
-```vue
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { setLocale, type Locale } from './i18n'
 import { useMatchSession } from './composables/useMatchSession'
+
+import Logo from '@/assets/images/bb-chief-v2.svg'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -61,13 +62,16 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="app-shell flex min-h-screen flex-col bg-bb-background text-bb-text selection:bg-bb-blue selection:text-white"
-    :class="{ 'setup-portrait-fallback': route.name === 'setup' }"
+    class="app-shell flex h-dvh min-h-0 flex-col overflow-x-hidden bg-bb-background text-bb-text selection:bg-bb-blue selection:text-white"
+    :class="{
+      'setup-portrait-fallback': route.name === 'setup',
+      'match-route': route.name === 'match',
+    }"
   >
     <!-- Cabecera común -->
-    <header class="border-b border-bb-border bg-bb-blue text-white shadow-sm">
+    <header class="shrink-0 border-b border-bb-border bg-bb-blue text-white shadow-sm">
       <div
-        class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4"
+        class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 sm:py-4"
       >
         <button
           type="button"
@@ -75,12 +79,7 @@ onBeforeUnmount(() => {
           :aria-label="t('app.logoLabel')"
           @click="prepareNewMatch"
         >
-          <div
-            class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 font-display text-2xl font-bold"
-            aria-hidden="true"
-          >
-            BB
-          </div>
+          <img :src="Logo" alt="" class="size-15 object-contain sm:size-16" aria-hidden="true" />
 
           <div class="min-w-0">
             <h1 class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">
@@ -120,7 +119,11 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- Aviso global de almacenamiento -->
-    <div v-if="storageWarning" class="mx-auto mt-4 w-full max-w-6xl px-4 sm:px-6" role="alert">
+    <div
+      v-if="storageWarning"
+      class="mx-auto mt-4 w-full max-w-6xl shrink-0 px-4 sm:px-6"
+      role="alert"
+    >
       <p
         class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-950"
       >
@@ -129,7 +132,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Vista actual: configuración o marcador -->
-    <div class="flex-1">
+    <div class="min-h-0 flex-1">
       <RouterView />
     </div>
 
@@ -222,6 +225,26 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/*
+ * Adaptación de la cabecera en el marcador.
+ * Se aplica únicamente en móviles con poca altura.
+ */
+@media (max-width: 767px) and (max-height: 760px) {
+  .match-route > header > div {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .match-route > header > div > button > div:first-child {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/*
+ * Alternativa visual para la configuración del partido
+ * cuando el navegador no permite bloquear la orientación.
+ */
 @media (orientation: landscape) {
   .setup-portrait-fallback {
     position: fixed;
@@ -256,4 +279,3 @@ onBeforeUnmount(() => {
   }
 }
 </style>
-```

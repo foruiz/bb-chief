@@ -34,7 +34,9 @@ describe('match persistence', () => {
   function makeSession() {
     return createSession(
       createMatch({
+        matchType: 'exhibition',
         format: 'normal',
+        advantageTeamId: null,
         kickingTeamId: 'home',
         home: { name: 'Reikland Reavers', race: 'Humanos', rerolls: 3 },
         away: { name: 'Gouged Eye', race: 'Orcos', rerolls: 2 },

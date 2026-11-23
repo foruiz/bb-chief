@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Degradado de fondo de la app -->
+    <linearGradient id="appBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10477D" />
+      <stop offset="100%" stop-color="#0A3155" />
+    </linearGradient>
+
+    <!-- Geometría exacta del escudo interior -->
+    <path id="shieldInterior" d="M256 76 L402 124 V248 C402 346 338 410 256 440 C174 410 110 346 110 248 V124 Z" />
+    
+    <clipPath id="clipShield">
+      <use href="#shieldInterior" />
+    </clipPath>
+  </defs>
+
+  <!-- Fondo Squircle estándar para móvil -->
+  <rect width="512" height="512" rx="112" fill="url(#appBg)" />
+
+  <!-- Sombra proyectada sutil detrás del escudo -->
+  <path d="M256 70 L414 122 V250 C414 354 346 422 256 454 C166 422 98 354 98 250 V122 Z" fill="#061D33" transform="translate(0, 8)" />
+
+  <!-- Contorno exterior blanco del escudo -->
+  <path d="M256 64 L414 116 V248 C414 352 346 420 256 452 C166 420 98 352 98 248 V116 Z" fill="#FFFFFF" />
+
+  <!-- Interior del escudo recortado con precisión -->
+  <g clip-path="url(#clipShield)">
+    <!-- Mitad Superior Izquierda: Azul Principal -->
+    <polygon points="80,60 440,60 80,420" fill="#10477D" />
+    
+    <!-- Mitad Inferior Derecha: Rojo Principal -->
+    <polygon points="440,60 440,460 80,460 80,420" fill="#B51920" />
+
+    <!-- Sutil brillo superior para dar volumen -->
+    <polygon points="80,60 440,60 440,180 80,180" fill="#FFFFFF" fill-opacity="0.06" />
+
+    <!-- Franja diagonal divisoria -->
+    <line x1="80" y1="420" x2="440" y2="60" stroke="#0A3155" stroke-width="18" />
+    <line x1="80" y1="420" x2="440" y2="60" stroke="#FFFFFF" stroke-width="6" />
+  </g>
+
+  <!-- Pinchos metálicos en la corona y punta del escudo -->
+  <polygon points="256,44 268,66 244,66" fill="#FFFFFF" />
+  <polygon points="256,472 268,450 244,450" fill="#FFFFFF" />
+
+  <!-- Remache táctico central sobre la línea diagonal -->
+  <circle cx="256" cy="244" r="16" fill="#0A3155" stroke="#FFFFFF" stroke-width="5" />
+  <circle cx="256" cy="244" r="5" fill="#B51920" />
+
+  <!-- PRIMERA 'B' VECTORIAL (Superior Izquierda - Blanca) -->
+  <path d="M148 148 H206 C224 148 235 157 235 173 C235 184 228 192 218 196 C230 200 238 209 238 223 C238 241 225 252 205 252 H148 Z 
+           M175 169 V189 H199 C206 189 210 185 210 179 C210 173 206 169 199 169 Z 
+           M175 207 V231 H202 C210 231 214 226 214 219 C214 212 210 207 202 207 Z" fill="#FFFFFF" />
+
+  <!-- SEGUNDA 'B' VECTORIAL (Inferior Derecha - Blanca) -->
+  <path d="M276 264 H334 C352 264 363 273 363 289 C363 300 356 308 346 312 C358 316 366 325 366 339 C366 357 353 368 333 368 H276 Z 
+           M303 285 V305 H327 C334 305 338 301 338 295 C338 289 334 285 327 285 Z 
+           M303 323 V347 H330 C338 347 342 342 342 335 C342 328 338 323 330 323 Z" fill="#FFFFFF" />
+</svg>

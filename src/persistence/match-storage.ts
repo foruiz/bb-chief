@@ -1,7 +1,8 @@
 import type { MatchSession, MatchState, Team, TeamId } from '../domain/models/match'
 
 const STORAGE_KEY = 'bb-chief.match-session'
-const STORAGE_VERSION = 1
+const STORAGE_VERSION = 2
+const LEGACY_STORAGE_VERSION = 1
 
 export interface StorageLike {
   getItem(key: string): string | null
@@ -39,6 +40,7 @@ function isTeam(value: unknown, expectedId: TeamId): value is Team {
     value.race.trim().length > 0 &&
     isNonNegativeInteger(value.touchdowns) &&
     isNonNegativeInteger(value.rerollsAvailable) &&
+    isNonNegativeInteger(value.rerollsPerHalf) &&
     isNonNegativeInteger(value.turnsCompleted)
   )
 }
@@ -47,7 +49,11 @@ function isMatchState(value: unknown): value is MatchState {
   if (!isRecord(value) || !isRecord(value.teams)) return false
 
   return (
+    (value.matchType === 'exhibition' || value.matchType === 'league-tournament') &&
     (value.format === 'normal' || value.format === 'sevens') &&
+    (value.advantageTeamId === null ||
+      value.advantageTeamId === 'home' ||
+      value.advantageTeamId === 'away') &&
     (value.half === 1 || value.half === 2) &&
     (value.status === 'in-progress' ||
       value.status === 'halftime-pending' ||
@@ -68,6 +74,51 @@ function isMatchSession(value: unknown): value is MatchSession {
     value.history.length <= 100 &&
     value.history.every(isMatchState)
   )
+}
+
+function isLegacyMatchState(value: unknown): boolean {
+  if (!isRecord(value)) return false
+
+  const { matchType: _matchType, advantageTeamId: _advantageTeamId, ...legacyState } = value
+
+  return isMatchState({
+    ...legacyState,
+    matchType: 'exhibition',
+    advantageTeamId: null,
+  })
+}
+
+function migrateLegacyState(value: unknown): MatchState {
+  if (!isRecord(value)) {
+    throw new Error('Invalid legacy match state')
+  }
+
+  return {
+    ...value,
+    matchType: 'exhibition',
+    advantageTeamId: null,
+  } as MatchState
+}
+
+function migrateLegacySession(value: unknown): MatchSession | null {
+  if (!isRecord(value) || !isRecord(value.current) || !Array.isArray(value.history)) {
+    return null
+  }
+
+  if (
+    !isLegacyMatchState(value.current) ||
+    value.history.length > 100 ||
+    !value.history.every(isLegacyMatchState)
+  ) {
+    return null
+  }
+
+  const migrated: MatchSession = {
+    current: migrateLegacyState(value.current),
+    history: value.history.map(migrateLegacyState),
+  }
+
+  return isMatchSession(migrated) ? migrated : null
 }
 
 export function saveSession(session: MatchSession, storage: StorageLike = localStorage): void {
@@ -93,7 +144,21 @@ export function loadSession(storage: StorageLike = localStorage): LoadSessionRes
   try {
     const data: unknown = JSON.parse(raw)
 
-    if (!isRecord(data) || data.version !== STORAGE_VERSION || !isMatchSession(data.session)) {
+    if (!isRecord(data)) {
+      return { status: 'invalid' }
+    }
+
+    if (data.version === LEGACY_STORAGE_VERSION) {
+      const migratedSession = migrateLegacySession(data.session)
+
+      if (!migratedSession) {
+        return { status: 'invalid' }
+      }
+
+      return { status: 'valid', session: migratedSession }
+    }
+
+    if (data.version !== STORAGE_VERSION || !isMatchSession(data.session)) {
       return { status: 'invalid' }
     }
 
