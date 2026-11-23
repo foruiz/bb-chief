@@ -13,7 +13,9 @@ import {
 import type { CreateMatchInput } from '../models/match'
 
 const input: CreateMatchInput = {
+  matchType: 'exhibition',
   format: 'normal',
+  advantageTeamId: null,
   kickingTeamId: 'home',
   home: { name: 'Orcos', race: 'Orcos', rerolls: 3 },
   away: { name: 'Humanos', race: 'Humanos', rerolls: 2 },

@@ -34,7 +34,9 @@ export function createMatch(input: CreateMatchInput): MatchState {
   const activeTeamId: TeamId = input.kickingTeamId === 'home' ? 'away' : 'home'
 
   return {
+    matchType: input.matchType,
     format: input.format,
+    advantageTeamId: input.advantageTeamId,
     half: 1,
     status: 'in-progress',
     kickingTeamId: input.kickingTeamId,
