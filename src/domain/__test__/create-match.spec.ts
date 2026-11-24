@@ -49,7 +49,7 @@ describe('createMatch', () => {
         ...validInput,
         home: { ...validInput.home, name: '  ' },
       }),
-    ).toThrow('El nombre del equipo no puede estar vacío')
+    ).toThrow('TEAM_NAME_REQUIRED')
   })
 
   it('rechaza segundas oportunidades negativas', () => {
@@ -58,6 +58,6 @@ describe('createMatch', () => {
         ...validInput,
         home: { ...validInput.home, rerolls: -1 },
       }),
-    ).toThrow('El número de segundas oportunidades no puede ser negativo')
+    ).toThrow('INVALID_REROLLS')
   })
 })

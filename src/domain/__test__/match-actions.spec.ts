@@ -63,9 +63,7 @@ describe('Operaciones de partido', () => {
   })
 
   it('rechaza touchdowns negativos', () => {
-    expect(() => correctTouchdowns(newSession(), 'home', -1)).toThrow(
-      'El número de touchdowns no puede ser negativo',
-    )
+    expect(() => correctTouchdowns(newSession(), 'home', -1)).toThrow('INVALID_TOUCHDOWNS')
   })
 
   it('consume una segunda oportunidad', () => {
@@ -82,7 +80,7 @@ describe('Operaciones de partido', () => {
       }),
     )
 
-    expect(() => useReroll(session, 'home')).toThrow('No hay segundas oportunidades disponibles')
+    expect(() => useReroll(session, 'home')).toThrow('NO_REROLLS_AVAILABLE')
   })
 
   it('permite corregir las segundas oportunidades', () => {
