@@ -81,10 +81,13 @@ describe('match persistence', () => {
     const result = loadSession(storage)
 
     expect(result.status).toBe('valid')
-    if (result.status === 'valid') {
-      expect(result.session.history).toHaveLength(1)
-      expect(result.session.current.teams.home.touchdowns).toBe(1)
+
+    if (result.status !== 'valid') {
+      throw new Error('Se esperaba una sesión válida')
     }
+
+    expect(result.session.history).toHaveLength(1)
+    expect(result.session.current.teams.home.touchdowns).toBe(1)
   })
 
   it('rejects malformed JSON', () => {
