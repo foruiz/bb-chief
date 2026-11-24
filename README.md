@@ -1,6 +1,6 @@
 # BB Chief
 
-BB Chief is a lightweight web application for tracking Blood Bowl 2020 matches.
+BB Chief is a lightweight web application for tracking Blood Bowl matches.
 
 It is designed to be used by both players on a shared mobile device or tablet, making it easy to keep track of the match without interrupting gameplay.
 
@@ -20,6 +20,7 @@ The core match management functionality and unit tests have been implemented. Th
 - Half-time and end-of-match management.
 - Reroll tracking and manual corrections.
 - Undo of the last action.
+- Spanish and English interface.
 - Responsive interface for mobile devices and tablets.
 - Local match persistence using browser storage.
 - Saved match recovery when reopening the application.
@@ -32,14 +33,18 @@ The project is built using:
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vite.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
+- [Vue Router](https://router.vuejs.org/)
+- [Vue I18n](https://vue-i18n.intlify.dev/)
 - [Vitest](https://vitest.dev/) for unit testing.
 - [Playwright](https://playwright.dev/) for end-to-end testing.
+- [ESLint](https://eslint.org/) and [Oxlint](https://oxc.rs/docs/guide/usage/linter) for linting.
+- [Prettier](https://prettier.io/) for code formatting.
 
 ## Requirements
 
 To run the project locally, you need:
 
-- [Node.js](https://nodejs.org/) (LTS version recommended).
+- [Node.js](https://nodejs.org/) `^22.18.0` or `>=24.12.0`, as specified in the `engines` field of `package.json`.
 - npm.
 - Git.
 
@@ -48,7 +53,7 @@ To run the project locally, you need:
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/bb-chief.git
+git clone https://github.com/foruiz/bb-chief.git
 ```
 
 Navigate to the project directory:
@@ -90,6 +95,9 @@ Then open the URL displayed by Vite in your mobile device or tablet.
 | `npm run test:e2e`   | Runs the end-to-end tests.                          |
 | `npm run type-check` | Runs TypeScript type checking.                      |
 | `npm run build`      | Checks types and builds the production application. |
+| `npm run preview`    | Serves the production build locally.                |
+| `npm run lint`       | Runs Oxlint and ESLint, applying automatic fixes.   |
+| `npm run format`     | Formats the source code in `src/` with Prettier.    |
 
 ## Match Data and Persistence
 
@@ -106,7 +114,7 @@ This means:
 
 ## Ruleset
 
-BB Chief is designed around the Blood Bowl 2020 ruleset, including the Sevens format.
+BB Chief is designed around the Blood Bowl Third Season Edition (2025) ruleset. The Sevens format is defined in the Spike! Journal Issue 22 supplement, and the application includes it.
 
 The application is intended as a match-tracking tool. It does not replace the official rulebook, calculate every game situation, or enforce all tabletop rules.
 
@@ -143,18 +151,45 @@ If you fork, clone, or redistribute this project, I kindly ask you to:
 - Include a link to the original repository whenever reasonably possible.
 - Clearly identify any modifications made to the original project.
 
-Original repository: https://github.com/YOUR-USERNAME/bb-chief
+Original repository: https://github.com/foruiz/bb-chief
 
-These attribution requests do not impose additional restrictions on the rights granted by the GPL-3.0 license.
+These attribution requests do not impose additional restrictions on the rights granted by the GPL-3.0-or-later license.
 
 ## License
 
-BB Chief is licensed under the **GNU General Public License v3.0 (GPL-3.0-only)**.
+BB Chief is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)**.
 
-You may use, study, modify, and redistribute this software under the terms and conditions of the GPL-3.0 license.
+You may use, study, modify, and redistribute this software under the terms and conditions of the GPL-3.0 license, or, at your option, any later version published by the Free Software Foundation.
 
-Copyright (C) 2026 YOUR-NAME
+Copyright (C) 2026 Fº Javier Olmedo Ruiz
 
 See the [`LICENSE`](LICENSE) file for the complete license text.
 
 The original copyright notices and license notices must be preserved when redistributing the project, as required by the license.
+
+## Credits and third-party licenses
+
+This project uses icons from [Game-icons.net](https://game-icons.net), licensed under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/):
+
+- **American football helmet** by [Delapouite](https://delapouite.com), modified.
+  Source: https://game-icons.net/1x1/delapouite/american-football-helmet.html
+
+Icons from [Lucide](https://lucide.dev) are used under the
+[ISC License](https://github.com/lucide-icons/lucide/blob/main/LICENSE):
+
+> ISC License
+>
+> Copyright (c) 2026 Lucide Icons and Contributors
+>
+> Permission to use, copy, modify, and/or distribute this software for any
+> purpose with or without fee is hereby granted, provided that the above
+> copyright notice and this permission notice appear in all copies.
+>
+> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+> WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+> MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+> ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+> WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+> ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+> OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
