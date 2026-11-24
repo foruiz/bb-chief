@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMatchSession } from '../composables/useMatchSession'
 
-import OptionsIcon from '../assets/icons/options.png'
-import PitchIcon from '../assets/icons/pitch.png'
+import BackIcon from '../components/icons/BackIcon.vue'
+import BallIcon from '../components/icons/BallIcon.vue'
+import DiceIcon from '../components/icons/DiceIcon.vue'
+import ExitIcon from '../components/icons/ExitIcon.vue'
+import HelmetIcon from '../components/icons/HelmetIcon.vue'
+import HelpIcon from '../components/icons/HelpIcon.vue'
+import OptionsIcon from '../components/icons/OptionsIcon.vue'
+import PauseIcon from '../components/icons/PauseIcon.vue'
+import TrophyIcon from '../components/icons/TrophyIcon.vue'
+import UndoIcon from '../components/icons/UndoIcon.vue'
 
 const { t } = useI18n()
 
@@ -35,6 +43,12 @@ watch(
 function toggleCardFace() {
   showBack.value = !showBack.value
 }
+
+// Tono del panel: dorado en descanso y final, equipo activo en partido en curso.
+const panelTone = computed<'gold' | 'home' | 'away'>(() => {
+  if (currentMatch.value?.status !== 'in-progress') return 'gold'
+  return activeTeam.value?.id === 'away' ? 'away' : 'home'
+})
 </script>
 
 <template>
@@ -78,12 +92,10 @@ function toggleCardFace() {
             <div class="match-team-content p-3 sm:p-5">
               <div
                 class="match-team-icon mx-auto flex size-12 items-center justify-center rounded-xl sm:size-16"
-                :class="
-                  team.id === 'home' ? 'bg-bb-blue-soft text-bb-blue' : 'bg-bb-red-soft text-bb-red'
-                "
+                :class="team.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                 aria-hidden="true"
               >
-                <span class="text-2xl sm:text-3xl">🛡️</span>
+                <HelmetIcon :class="team.id === 'away' ? '-scale-x-100' : ''" />
               </div>
 
               <p
@@ -123,13 +135,21 @@ function toggleCardFace() {
           <!-- Cara frontal -->
           <section
             class="card-face overflow-hidden rounded-2xl border bg-bb-surface shadow-sm"
-            :class="activeTeam?.id === 'away' ? 'border-bb-red/40' : 'border-bb-blue/40'"
+            :class="{
+              'border-amber-950': panelTone === 'gold',
+              'border-bb-red/40': panelTone === 'away',
+              'border-bb-blue/40': panelTone === 'home',
+            }"
             :aria-hidden="showBack"
             :inert="showBack"
           >
             <div
               class="h-1.5 shrink-0"
-              :class="activeTeam?.id === 'away' ? 'bg-bb-red' : 'bg-bb-blue'"
+              :class="{
+                'bg-amber-950': panelTone === 'gold',
+                'bg-bb-red': panelTone === 'away',
+                'bg-bb-blue': panelTone === 'home',
+              }"
             ></div>
 
             <div class="match-card-content p-4 sm:p-6">
@@ -138,14 +158,10 @@ function toggleCardFace() {
                 <div class="flex items-start gap-3">
                   <div
                     class="match-active-icon flex size-14 shrink-0 items-center justify-center rounded-xl sm:size-16"
-                    :class="
-                      activeTeam.id === 'home'
-                        ? 'bg-bb-blue-soft text-bb-blue'
-                        : 'bg-bb-red-soft text-bb-red'
-                    "
+                    :class="activeTeam.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                     aria-hidden="true"
                   >
-                    <span class="text-3xl">🛡️</span>
+                    <HelmetIcon />
                   </div>
 
                   <div class="min-w-0 flex-1">
@@ -177,12 +193,7 @@ function toggleCardFace() {
                     :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
-                    <img
-                      :src="OptionsIcon"
-                      alt=""
-                      class="size-8 object-contain sm:size-9"
-                      aria-hidden="true"
-                    />
+                    <OptionsIcon class="size-8 sm:size-9" />
                   </button>
                 </div>
 
@@ -194,12 +205,12 @@ function toggleCardFace() {
                     class="match-action flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                       activeTeam.id === 'home'
-                        ? 'border-bb-blue/30 bg-bb-blue-soft hover:bg-blue-100'
-                        : 'border-bb-red/30 bg-bb-red-soft hover:bg-red-100'
+                        ? 'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100'
+                        : 'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100'
                     "
                     @click="addTouchdown(activeTeam.id)"
                   >
-                    <span class="text-2xl" aria-hidden="true">🏈</span>
+                    <BallIcon class="size-8 sm:size-9" />
                     <span class="text-sm font-black">
                       {{ t('matchView.active.scoreTouchdown') }}
                     </span>
@@ -213,17 +224,18 @@ function toggleCardFace() {
                     class="match-action flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                       activeTeam.id === 'home'
-                        ? 'border-bb-blue/30 bg-bb-blue-soft hover:bg-blue-100'
-                        : 'border-bb-red/30 bg-bb-red-soft hover:bg-red-100'
+                        ? 'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100'
+                        : 'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100'
                     "
                     @click="consumeReroll(activeTeam.id)"
                   >
                     <span
-                      class="score-number text-4xl"
+                      class="score-number flex items-center justify-center gap-2 text-4xl"
                       aria-hidden="true"
                       :class="activeTeam.id === 'home' ? 'text-bb-blue' : 'text-bb-red'"
                     >
-                      {{ activeTeam.rerollsAvailable }} 🎲
+                      {{ activeTeam.rerollsAvailable }}
+                      <DiceIcon class="size-8 sm:size-9" />
                     </span>
 
                     <span class="text-sm font-black">
@@ -267,7 +279,7 @@ function toggleCardFace() {
                     ></div>
                   </div>
 
-                  <p class="match-end-hint mt-3 text-center text-xs text-slate-950/80">
+                  <p class="match-end-hint mt-3 text-center text-xs">
                     {{ t('matchView.active.endTurnHint') }}
                   </p>
                 </button>
@@ -277,10 +289,10 @@ function toggleCardFace() {
               <template v-else-if="currentMatch.status === 'halftime-pending'">
                 <div class="flex items-start gap-3">
                   <div
-                    class="match-active-icon flex size-14 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-3xl sm:size-16"
+                    class="match-active-icon flex size-14 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950 text-3xl sm:size-16"
                     aria-hidden="true"
                   >
-                    ⏸
+                    <PauseIcon class="size-8 sm:size-9" />
                   </div>
 
                   <div class="min-w-0 flex-1">
@@ -299,17 +311,12 @@ function toggleCardFace() {
 
                   <button
                     type="button"
-                    class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-bb-blue/30 bg-bb-blue-soft text-bb-blue transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
+                    class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-amber-400/60 bg-amber-400 text-amber-950 hover:bg-amber-300 focus-visible:outline-amber-400 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
                     :aria-label="t('matchView.options.show')"
                     :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
-                    <img
-                      :src="OptionsIcon"
-                      alt=""
-                      class="size-8 object-contain sm:size-9"
-                      aria-hidden="true"
-                    />
+                    <OptionsIcon class="size-8 sm:size-9" />
                   </button>
                 </div>
 
@@ -326,10 +333,10 @@ function toggleCardFace() {
               <template v-else-if="currentMatch.status === 'finished'">
                 <div class="flex items-start gap-3">
                   <div
-                    class="match-active-icon flex size-14 shrink-0 items-center justify-center rounded-xl bg-bb-blue-soft text-3xl text-bb-blue sm:size-16"
+                    class="match-active-icon flex size-14 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-amber-950 text-3xl sm:size-16"
                     aria-hidden="true"
                   >
-                    🏆
+                    <TrophyIcon class="size-8 sm:size-9" />
                   </div>
 
                   <div class="min-w-0 flex-1">
@@ -337,24 +344,19 @@ function toggleCardFace() {
                       {{ t('matchView.status.finished') }}
                     </p>
 
-                    <h3 class="font-display text-2xl font-bold text-bb-blue sm:text-3xl">
+                    <h3 class="font-display text-2xl font-bold text-amber-950 sm:text-3xl">
                       {{ t('matchView.finished.title') }}
                     </h3>
                   </div>
 
                   <button
                     type="button"
-                    class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-bb-blue/30 bg-bb-blue-soft text-bb-blue transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
+                    class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border border-amber-400/60 bg-amber-400 text-amber-950 hover:bg-amber-300 focus-visible:outline-amber-400 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue sm:size-16"
                     :aria-label="t('matchView.options.show')"
                     :title="t('matchView.options.show')"
                     @click="toggleCardFace"
                   >
-                    <img
-                      :src="OptionsIcon"
-                      alt=""
-                      class="size-8 object-contain sm:size-9"
-                      aria-hidden="true"
-                    />
+                    <OptionsIcon class="size-8 sm:size-9" />
                   </button>
                 </div>
 
@@ -406,13 +408,21 @@ function toggleCardFace() {
           <!-- Cara posterior: opciones del partido -->
           <section
             class="card-face card-back overflow-hidden rounded-2xl border bg-bb-surface shadow-sm"
-            :class="activeTeam?.id === 'away' ? 'border-bb-red/40' : 'border-bb-blue/40'"
+            :class="{
+              'border-amber-950': panelTone === 'gold',
+              'border-bb-red/40': panelTone === 'away',
+              'border-bb-blue/40': panelTone === 'home',
+            }"
             :aria-hidden="!showBack"
             :inert="!showBack"
           >
             <div
               class="h-1.5 shrink-0"
-              :class="activeTeam?.id === 'away' ? 'bg-bb-red' : 'bg-bb-blue'"
+              :class="{
+                'bg-amber-950': panelTone === 'gold',
+                'bg-bb-red': panelTone === 'away',
+                'bg-bb-blue': panelTone === 'home',
+              }"
             ></div>
 
             <div class="match-card-content flex min-h-64 flex-col p-4 sm:min-h-80 sm:p-6">
@@ -421,7 +431,11 @@ function toggleCardFace() {
                 <div class="min-w-0 flex-1">
                   <h3
                     class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl"
-                    :class="activeTeam?.id === 'away' ? 'text-bb-red' : 'text-bb-blue'"
+                    :class="{
+                      'text-amber-950': panelTone === 'gold',
+                      'text-bb-red': panelTone === 'away',
+                      'text-bb-blue': panelTone === 'home',
+                    }"
                   >
                     {{ t('matchView.options.title') }}
                   </h3>
@@ -430,21 +444,19 @@ function toggleCardFace() {
                 <button
                   type="button"
                   class="match-flip-button flex size-14 shrink-0 items-center justify-center rounded-xl border transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 sm:size-16"
-                  :class="
-                    activeTeam?.id === 'away'
-                      ? 'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red'
-                      : 'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue'
-                  "
+                  :class="{
+                    'border-amber-400/60 bg-amber-400 text-amber-950 hover:bg-amber-300 focus-visible:outline-amber-400':
+                      panelTone === 'gold',
+                    'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red':
+                      panelTone === 'away',
+                    'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue':
+                      panelTone === 'home',
+                  }"
                   :aria-label="t('matchView.options.backToScore')"
                   :title="t('matchView.options.backToScore')"
                   @click="toggleCardFace"
                 >
-                  <img
-                    :src="PitchIcon"
-                    alt=""
-                    class="size-8 object-contain sm:size-9"
-                    aria-hidden="true"
-                  />
+                  <BackIcon class="size-8 sm:size-9" />
                 </button>
               </div>
 
@@ -455,9 +467,14 @@ function toggleCardFace() {
                   disabled
                   :aria-label="t('matchView.options.helpComingSoon')"
                   :title="t('matchView.options.comingSoon')"
-                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-bb-border bg-bb-background p-2 text-bb-muted opacity-60"
+                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-2 opacity-60"
+                  :class="{
+                    'border-amber-400/60 bg-amber-50 text-amber-950': panelTone === 'gold',
+                    'border-bb-red/30 bg-bb-red-soft text-bb-red': panelTone === 'away',
+                    'border-bb-blue/30 bg-bb-blue-soft text-bb-blue': panelTone === 'home',
+                  }"
                 >
-                  <span class="text-3xl" aria-hidden="true">❔</span>
+                  <HelpIcon class="size-8 sm:size-9" />
                   <span class="text-sm font-bold">
                     {{ t('matchView.options.help') }}
                   </span>
@@ -466,10 +483,18 @@ function toggleCardFace() {
                 <button
                   type="button"
                   :disabled="!session?.history?.length"
-                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-bb-border bg-bb-background p-2 font-bold text-bb-text transition hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue disabled:cursor-not-allowed disabled:opacity-40"
+                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-2 font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                  :class="{
+                    'border-amber-400/60 bg-amber-50 text-amber-950 hover:bg-amber-100 focus-visible:outline-amber-400':
+                      panelTone === 'gold',
+                    'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red':
+                      panelTone === 'away',
+                    'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue':
+                      panelTone === 'home',
+                  }"
                   @click="undo"
                 >
-                  <span class="text-3xl" aria-hidden="true">↶</span>
+                  <UndoIcon class="size-8 sm:size-9" />
                   <span class="text-sm">
                     {{ t('matchView.options.undo') }}
                   </span>
@@ -477,17 +502,32 @@ function toggleCardFace() {
 
                 <button
                   type="button"
-                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border border-bb-red/30 bg-bb-red-soft p-2 font-bold text-bb-red transition hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-red"
+                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-2 font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2"
+                  :class="{
+                    'border-amber-400/60 bg-amber-50 text-amber-950 hover:bg-amber-100 focus-visible:outline-amber-400':
+                      panelTone === 'gold',
+                    'border-bb-red/30 bg-bb-red-soft text-bb-red hover:bg-red-100 focus-visible:outline-bb-red':
+                      panelTone === 'away',
+                    'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue':
+                      panelTone === 'home',
+                  }"
                   @click="prepareNewMatch"
                 >
-                  <span class="text-3xl" aria-hidden="true">↩</span>
+                  <ExitIcon class="size-8 sm:size-9" />
                   <span class="text-sm">
                     {{ t('matchView.options.exit') }}
                   </span>
                 </button>
               </div>
 
-              <p class="mt-auto pt-5 text-center text-xs text-bb-muted">
+              <p
+                class="mt-auto pt-5 text-center text-xs"
+                :class="{
+                  'text-amber-950/80': panelTone === 'gold',
+                  'text-bb-red': panelTone === 'away',
+                  'text-bb-blue': panelTone === 'home',
+                }"
+              >
                 {{ t('matchView.options.exitHint') }}
               </p>
             </div>
