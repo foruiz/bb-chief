@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useMatchSession } from '../composables/useMatchSession'
 
 import BackIcon from '../components/icons/BackIcon.vue'
@@ -15,6 +16,7 @@ import TrophyIcon from '../components/icons/TrophyIcon.vue'
 import UndoIcon from '../components/icons/UndoIcon.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const {
   session,
@@ -28,7 +30,6 @@ const {
   endTurn,
   startSecondHalf,
   undo,
-  prepareNewMatch,
 } = useMatchSession()
 
 const showBack = ref(false)
@@ -39,6 +40,14 @@ watch(
     showBack.value = false
   },
 )
+
+async function exitToMenu() {
+  await router.push('/menu')
+}
+
+async function openHelp() {
+  await router.push({ path: '/help', query: { from: 'match' } })
+}
 
 function toggleCardFace() {
   showBack.value = !showBack.value
@@ -464,10 +473,11 @@ const panelTone = computed<'gold' | 'home' | 'away'>(() => {
               <div class="match-option-grid mt-6 grid grid-cols-3 gap-3">
                 <button
                   type="button"
-                  disabled
-                  :aria-label="t('matchView.options.helpComingSoon')"
-                  :title="t('matchView.options.comingSoon')"
-                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-2 opacity-60"
+                  data-testid="match-help"
+                  :aria-label="t('matchView.options.help')"
+                  :title="t('matchView.options.help')"
+                  @click="openHelp"
+                  class="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-2 transition focus-visible:outline-2 focus-visible:outline-offset-2"
                   :class="{
                     'border-amber-400/60 bg-amber-50 text-amber-950': panelTone === 'gold',
                     'border-bb-red/30 bg-bb-red-soft text-bb-red': panelTone === 'away',
@@ -511,7 +521,7 @@ const panelTone = computed<'gold' | 'home' | 'away'>(() => {
                     'border-bb-blue/30 bg-bb-blue-soft text-bb-blue hover:bg-blue-100 focus-visible:outline-bb-blue':
                       panelTone === 'home',
                   }"
-                  @click="prepareNewMatch"
+                  @click="exitToMenu"
                 >
                   <ExitIcon class="size-8 sm:size-9" />
                   <span class="text-sm">

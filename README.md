@@ -175,6 +175,9 @@ This project uses icons from [Game-icons.net](https://game-icons.net), licensed 
 - **American football helmet** by [Delapouite](https://delapouite.com), modified.
   Source: https://game-icons.net/1x1/delapouite/american-football-helmet.html
 
+- **Confrontation** by [Delapouite](https://delapouite.com), unmodified.
+  Source: https://game-icons.net/1x1/delapouite/confrontation.html
+
 Icons from [Lucide](https://lucide.dev) are used under the
 [ISC License](https://github.com/lucide-icons/lucide/blob/main/LICENSE):
 

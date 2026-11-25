@@ -17,8 +17,6 @@ export type StorageWarning = 'saveError' | 'readError' | 'unavailable' | 'delete
 
 // Estado compartido: se crea una sola vez para toda la aplicación.
 const session = ref<MatchSession | null>(null)
-const pendingSession = ref<MatchSession | null>(null)
-const recoveryPending = ref(false)
 const showNewMatchConfirmation = ref(false)
 const errorMessage = ref('')
 const storageWarning = ref<StorageWarning>(null)
@@ -46,12 +44,28 @@ function initializeSession() {
 
   initialized = true
 
-  // El watcher se registra una sola vez y no guarda antes de recuperar
-  // una posible sesión anterior.
+  // La partida guardada se carga directamente: la aplicación irá al menú,
+  // donde aparece la opción Continuar partida.
+  try {
+    const result = loadSession()
+
+    if (result.status === 'valid') {
+      session.value = result.session
+    } else if (result.status === 'invalid') {
+      storageWarning.value = 'readError'
+    } else if (result.status === 'unavailable') {
+      storageWarning.value = 'unavailable'
+    }
+  } catch {
+    storageWarning.value = 'unavailable'
+  }
+
+  // El watcher se registra después de cargar, para no volver a guardar
+  // lo que se acaba de leer.
   watch(
     session,
     (current) => {
-      if (!current || recoveryPending.value) return
+      if (!current) return
 
       try {
         saveSession(current)
@@ -62,21 +76,6 @@ function initializeSession() {
     },
     { deep: true },
   )
-
-  try {
-    const result = loadSession()
-
-    if (result.status === 'valid') {
-      pendingSession.value = result.session
-      recoveryPending.value = true
-    } else if (result.status === 'invalid') {
-      storageWarning.value = 'readError'
-    } else if (result.status === 'unavailable') {
-      storageWarning.value = 'unavailable'
-    }
-  } catch {
-    storageWarning.value = 'unavailable'
-  }
 }
 
 function startMatch(input: CreateMatchInput) {
@@ -132,8 +131,6 @@ function beginNewMatch() {
   }
 
   session.value = null
-  pendingSession.value = null
-  recoveryPending.value = false
   showNewMatchConfirmation.value = false
   storageWarning.value = null
   errorMessage.value = ''
@@ -141,11 +138,9 @@ function beginNewMatch() {
   return true
 }
 
+// Comenzar una partida nueva pide confirmación si la actual no ha terminado.
 function newMatch() {
-  const matchToReplace = session.value ?? pendingSession.value
-
-  if (matchToReplace && matchToReplace.current.status !== 'finished') {
-    recoveryPending.value = false
+  if (session.value && session.value.current.status !== 'finished') {
     showNewMatchConfirmation.value = true
     return false
   }
@@ -155,25 +150,10 @@ function newMatch() {
 
 function cancelNewMatch() {
   showNewMatchConfirmation.value = false
-
-  if (pendingSession.value) {
-    recoveryPending.value = true
-  }
 }
 
 function confirmNewMatch() {
   return beginNewMatch()
-}
-
-function continueSavedMatch() {
-  if (!pendingSession.value) return false
-
-  session.value = pendingSession.value
-  pendingSession.value = null
-  recoveryPending.value = false
-  errorMessage.value = ''
-
-  return true
 }
 
 export function useMatchSession() {
@@ -187,28 +167,19 @@ export function useMatchSession() {
   }
 
   async function prepareNewMatch() {
-    const shouldNavigate = newMatch()
-
-    if (shouldNavigate) {
+    if (newMatch()) {
       await router.push('/setup')
     }
   }
 
-  async function discardSavedAndPrepareNewMatch() {
-    if (beginNewMatch()) {
-      await router.push('/setup')
-    }
+  async function cancelAndOpenMatch() {
+    cancelNewMatch()
+    await router.push('/match')
   }
 
   async function confirmAndPrepareNewMatch() {
     if (confirmNewMatch()) {
       await router.push('/setup')
-    }
-  }
-
-  async function continueAndOpenMatch() {
-    if (continueSavedMatch()) {
-      await router.push('/match')
     }
   }
 
@@ -218,8 +189,6 @@ export function useMatchSession() {
     maxTurns,
     teams,
     activeTeam,
-    pendingSession,
-    recoveryPending,
     showNewMatchConfirmation,
     errorMessage,
     storageWarning,
@@ -231,9 +200,8 @@ export function useMatchSession() {
     startSecondHalf,
     undo,
     prepareNewMatch,
-    discardSavedAndPrepareNewMatch,
     cancelNewMatch,
+    cancelAndOpenMatch,
     confirmAndPrepareNewMatch,
-    continueAndOpenMatch,
   }
 }
