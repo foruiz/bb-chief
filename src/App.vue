@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { setLocale, type Locale } from './i18n'
 import { useMatchSession } from './composables/useMatchSession'
 
 import Logo from '@/assets/images/bb-chief-v2.svg'
 
 const route = useRoute()
+const router = useRouter()
 const { t, locale } = useI18n()
 
 const {
-  recoveryPending,
   showNewMatchConfirmation,
   storageWarning,
   initializeSession,
-  discardSavedAndPrepareNewMatch,
-  cancelNewMatch,
+  cancelAndOpenMatch,
   confirmAndPrepareNewMatch,
-  continueAndOpenMatch,
-  prepareNewMatch,
 } = useMatchSession()
+
+async function goToMenu() {
+  await router.push('/menu')
+}
 
 function changeLocale(newLocale: Locale) {
   setLocale(newLocale)
@@ -77,7 +78,7 @@ onBeforeUnmount(() => {
           type="button"
           class="flex min-w-0 items-center gap-3 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           :aria-label="t('app.logoLabel')"
-          @click="prepareNewMatch"
+          @click="goToMenu"
         >
           <img :src="Logo" alt="" class="size-15 object-contain sm:size-16" aria-hidden="true" />
 
@@ -131,53 +132,10 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <!-- Vista actual: configuración o marcador -->
+    <!-- Vista actual: menú, configuración, marcador o ayuda -->
     <div class="min-h-0 flex-1">
       <RouterView />
     </div>
-
-    <!-- Recuperación de partida guardada -->
-    <Teleport to="body">
-      <div
-        v-if="recoveryPending"
-        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm"
-        :class="{ 'setup-portrait-overlay': route.name === 'setup' }"
-        role="presentation"
-      >
-        <section
-          class="my-auto w-full max-w-md rounded-2xl border border-bb-border bg-bb-surface p-6 shadow-2xl"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="recovery-title"
-        >
-          <h2 id="recovery-title" class="mt-4 font-display text-3xl font-bold">
-            {{ t('recovery.title') }}
-          </h2>
-
-          <p class="mt-3 text-sm leading-relaxed text-bb-muted">
-            {{ t('recovery.description') }}
-          </p>
-
-          <div class="mt-6 grid gap-3">
-            <button
-              type="button"
-              class="min-h-12 rounded-xl bg-bb-blue px-4 py-3 font-bold text-white transition hover:bg-bb-blue-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
-              @click="continueAndOpenMatch"
-            >
-              {{ t('recovery.continue') }}
-            </button>
-
-            <button
-              type="button"
-              class="min-h-12 rounded-xl border border-bb-red/30 px-4 py-3 font-bold text-bb-red transition hover:bg-bb-red-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-red"
-              @click="discardSavedAndPrepareNewMatch"
-            >
-              {{ t('recovery.discard') }}
-            </button>
-          </div>
-        </section>
-      </div>
-    </Teleport>
 
     <!-- Confirmación para descartar una partida en curso -->
     <Teleport to="body">
@@ -213,7 +171,7 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="min-h-12 rounded-xl border border-bb-border px-4 py-3 font-bold text-bb-text transition hover:bg-bb-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-blue"
-              @click="cancelNewMatch"
+              @click="cancelAndOpenMatch"
             >
               {{ t('match.confirmNew.cancel') }}
             </button>

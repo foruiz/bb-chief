@@ -2,7 +2,7 @@
   "app": {
     "tagline": "A Blood Bowl app",
     "language": "Seleccionar idioma",
-    "logoLabel": "BB Chief, ir a configuración"
+    "logoLabel": "BB Chief, ir al menú"
   },
   "recovery": {
     "title": "Partida guardada",
@@ -75,7 +75,7 @@
       "comingSoon": "Próximamente",
       "undo": "Deshacer última acción",
       "exit": "Salir",
-      "exitHint": "Salir abrirá la confirmación si la partida todavía está en curso."
+      "exitHint": "Salir te llevará al menú principal de la aplicación."
     },
     "accessibility": {
       "teamCard": "Tarjeta de {team}",
@@ -203,5 +203,24 @@
       "creating": "Comenzar partido…",
       "startMatch": "Comenzar partido"
     }
+  },
+  "help": {
+    "title": "Ayuda",
+    "searchLabel": "Buscar en la ayuda",
+    "searchPlaceholder": "Escribe al menos 3 letras",
+    "clearSearch": "Borrar búsqueda",
+    "tooShort": "Por favor, indique al menos 3 caracteres.",
+    "noResults": "No se ha encontrado ninguna entrada para el texto proporcionado.",
+    "back": "Volver"
+  },
+  "menu": {
+    "title": "Menú",
+    "subtitle": "¿Qué quieres hacer?",
+    "startMatch": "Comenzar partido",
+    "continueMatch": "Continuar partida",
+    "continueMatchHint": "Vuelve al marcador de la partida en curso.",
+    "startMatchHint": "Configura un encuentro y abre el marcador.",
+    "help": "Ayuda",
+    "helpHint": "Busca habilidades y sus reglas."
   }
 }

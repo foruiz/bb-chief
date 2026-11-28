@@ -5,7 +5,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/setup',
+      redirect: '/menu',
+    },
+    {
+      path: '/menu',
+      name: 'menu',
+      component: () => import('../views/MenuView.vue'),
     },
     {
       path: '/setup',
@@ -16,6 +21,11 @@ const router = createRouter({
       path: '/match',
       name: 'match',
       component: () => import('../views/MatchView.vue'),
+    },
+    {
+      path: '/help',
+      name: 'help',
+      component: () => import('../views/HelpView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
