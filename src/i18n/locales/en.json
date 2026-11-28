@@ -2,7 +2,7 @@
   "app": {
     "tagline": "A Blood Bowl app",
     "language": "Select language",
-    "logoLabel": "BB Chief, go to setup"
+    "logoLabel": "BB Chief, go to menu"
   },
   "recovery": {
     "title": "Saved match",
@@ -75,7 +75,7 @@
       "comingSoon": "Coming soon",
       "undo": "Undo last action",
       "exit": "Exit",
-      "exitHint": "Exiting will ask for confirmation if the match is still in progress."
+      "exitHint": "Exit will take you to the main menu of the app."
     },
     "accessibility": {
       "teamCard": "{team}'s card",
@@ -203,5 +203,24 @@
       "creating": "Starting match…",
       "startMatch": "Start match"
     }
+  },
+  "help": {
+    "title": "Help",
+    "searchLabel": "Search help",
+    "searchPlaceholder": "Type at least 3 letters",
+    "clearSearch": "Clear search",
+    "tooShort": "Please enter at least 3 characters.",
+    "noResults": "No entries found for the text entered.",
+    "back": "Back"
+  },
+  "menu": {
+    "title": "Menu",
+    "subtitle": "What would you like to do?",
+    "startMatch": "Start match",
+    "continueMatch": "Continue match",
+    "continueMatchHint": "Return to the scoreboard of the match in progress.",
+    "startMatchHint": "Set up a match and open the scoreboard.",
+    "help": "Help",
+    "helpHint": "Search skills and their rules."
   }
 }
